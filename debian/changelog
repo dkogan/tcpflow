@@ -1,0 +1,111 @@
+tcpflow (0.21-6) unstable; urgency=high
+
+  * Updated to Build-Dep upon the automake1.7 package which
+    should finally allow it to build correctly.  (Verified this
+    with pbuilder)
+    (Closes: #272555).
+  * Severity set to medium as this is the second revision
+    which didn't correctly build from source.
+
+ -- Steve Kemp <skx@debian.org>  Tuesday, 21 September 2004 19:39:26 +0000
+
+tcpflow (0.21-5) unstable; urgency=low
+
+  * Fix the FTBFS problems which occurred due to timestamp issues
+    on the autoconf files.  (Closes: #271159).
+
+ -- Steve Kemp <skx@debian.org>  Friday, 7 September 2004 21:52:46 +0000
+
+tcpflow (0.21-4) unstable; urgency=high
+
+  * Fix the FTBFS issue which was caused by out of date
+    autoconf files.
+    (Closes: #259890)	
+
+ -- Steve Kemp <skx@debian.org>  Monday, 16 August 2004 21:13:30 +0000
+
+tcpflow (0.21-3) unstable; urgency=medium
+
+  * Fixes the longstanding (two years!) bug where occaisional
+    source port reuse causes captures to have large amounts of
+    erroneous NULL characters.
+    (Closes: #143826) Major thanks to Mike Castle for diagnosing
+    the source of this bug and submitting an almost perfect patch.
+  * Added the ability to colour code the output when dumping to
+    the console.  Alternate flows appear in alternating colours.
+    (Closes: #233082)
+
+ -- Steve Kemp <skx@debian.org>  Thursday, 15 July 2004 23:38:12 +0000	
+tcpflow (0.21-2) unstable; urgency=low
+
+  * Updated standards version 3.6.1 - no changes.
+  * Added the option to supress printing 'ip1:port1-ip2:port2' when
+    dumping to the console.
+    (Closes: #111689) 
+
+ -- Steve Kemp <skx@debian.org>  Tuesday, 4 November 2003 09:27:34 +0000	
+	
+tcpflow (0.21-1) unstable; urgency=low
+
+  * New upstream release.
+    (Closes: #204454)
+  * Updated standards version to 3.6.0 - no changes.
+	
+ -- Steve Kemp <skx@debian.org>  Thursday, 7 August 2003 15:28:39 +0000	
+
+tcpflow (0.20-2) unstable; urgency=low
+
+  * New maintainer.  (Closes: 193118)
+  * Incorporated the NMU (Closes: 156186)
+  * Updated standards version to 3.5.9
+	
+ -- Steve Kemp <skx@debian.org>  Friday, 16 May 2003 11:48:56 +0000	
+	
+tcpflow (0.20-1.1) unstable; urgency=low
+
+  * Non maintainer upload
+  * Rebuilt with new libpcap to remove dependency on libpcap0, which I
+    got removed from unstable by accident. Sorry about this...
+
+ -- Torsten Landschoff <torsten@debian.org>  Sat, 10 Aug 2002 11:37:39 +0200
+
+tcpflow (0.20-1) unstable; urgency=medium
+
+  * New upstream version - does not leave adapter PROMISC.
+  * Builds flawlessly on unstable systems. (Closes: #76807)
+  * Removed INSTALL file from the installed docs, I'm assuming
+    users of the package already have it installed.
+  * Minor debian/rules tweaks.
+  * Updated description and standards version.
+  * Now suggesting tcpdump.
+
+ -- Robert McQueen <robot101@debian.org>  Tue, 27 Feb 2001 01:36:16 +0000
+
+tcpflow (0.12-3) unstable; urgency=low
+
+  * Package now builds on woody, but its an evil hack so
+    bug #76807 stays open. Thanks to Alexander Kotelnikov
+    <sacha@debian.org> for helping me fix this.
+  * Removed spurious menu entry.
+  * Upgraded policy version and tidied debian/rules.
+  * Changed to @debian.org maintainer address.
+
+ -- Robert McQueen <robot101@debian.org>  Thu, 30 Nov 2000 00:44:22 +0000
+
+tcpflow (0.12-2) unstable; urgency=low
+
+  * Fixed erroneous description entry: (available here).
+    (Closes: Bug#68446)
+
+ -- Robert McQueen <robert.mcqueen@hands.com>  Fri,  4 Aug 2000 00:54:55 +0100
+
+tcpflow (0.12-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Robert McQueen <robert.mcqueen@hands.com>  Sat, 29 Jul 2000 02:16:59 +0100
+
+Local variables:
+mode: debian-changelog
+add-log-mailing-address "skx@debian.org"
+End:

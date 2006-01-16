@@ -1,3 +1,10 @@
+tcpflow (0.21-7) unstable; urgency=low
+
+  * Updated the debhelper compatability level to four.
+  * Updated Debian Standards Version.
+
+ -- Steve Kemp <skx@debian.org>  Monday, 16 January 2006 15:40:19 +0000
+
 tcpflow (0.21-6) unstable; urgency=high
 
   * Updated to Build-Dep upon the automake1.7 package which

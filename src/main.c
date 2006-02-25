@@ -140,11 +140,11 @@ int main(int argc, char *argv[])
     case 'C':
       supress_header = 1;
       DEBUG(10) ("packet header dump suppressed");
-      /* fall through */
+      break;
     case 'c':
       console_only = 1;
       DEBUG(10) ("printing packets to console only");
-      /* fall through */
+      break;
     case 's':
       strip_nonprint = 1;
       DEBUG(10) ("converting non-printable characters to '.'");

@@ -1,3 +1,11 @@
+tcpflow (0.21-8) unstable; urgency=low
+
+  * Changed the default command line arguments, so that -C doesnt
+    imply -s.
+  * Updated documentation to match.
+
+ -- Steve Kemp <skx@debian.org>  Saturday, 25 February 2006 19:43:56 +0000
+
 tcpflow (0.21-7) unstable; urgency=low
 
   * Updated the debhelper compatability level to four.

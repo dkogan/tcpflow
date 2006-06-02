@@ -2,7 +2,7 @@ Source: tcpflow
 Section: net
 Priority: optional
 Maintainer: Steve Kemp <skx@debian.org>
-Standards-Version: 3.6.2
+Standards-Version: 3.7.2
 Build-Depends: debhelper (>> 3.0.0), libpcap-dev, automake1.7
 
 Package: tcpflow

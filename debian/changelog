@@ -1,3 +1,12 @@
+tcpflow (0.21-9) unstable; urgency=low
+
+  * Updated Debian Standards version to 3.7.2
+  * Restore behaviour of the '-C' switch, which was broken in
+    the previous release.
+    (Closes: #368728)
+
+ -- Steve Kemp <skx@debian.org>  Friday, 2 June 2006 09:54:06 +0000
+
 tcpflow (0.21-8) unstable; urgency=low
 
   * Changed the default command line arguments, so that -C doesnt

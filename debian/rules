@@ -5,9 +5,6 @@
 # Uncomment this to turn on verbose mode.
 # export DH_VERBOSE=1
 
-# This is the debhelper compatability version to use.
-export DH_COMPAT=4
-
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -32,7 +29,7 @@ build-stamp:
 	touch build-stamp
 
 clean:
-# Make sure that we have up-to-datge config.sub/guess files.
+# Make sure that we have up-to-date config.sub/guess files.
 # See /usr/share/doc/autotools-dev/README.Debian.gz for details.
 	-test -r /usr/share/misc/config.sub && cp -f /usr/share/misc/config.sub config.sub
 	-test -r /usr/share/misc/config.guess && cp -f /usr/share/misc/config.guess config.guess

@@ -1,9 +1,9 @@
 Source: tcpflow
 Section: net
 Priority: optional
-Maintainer: Steve Kemp <skx@debian.org>
+Maintainer: Romain Francoise <rfrancoise@debian.org>
 Standards-Version: 3.7.2
-Build-Depends: debhelper (>> 3.0.0), libpcap-dev, automake1.7
+Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, automake1.7
 
 Package: tcpflow
 Architecture: any

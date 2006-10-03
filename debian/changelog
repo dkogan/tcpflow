@@ -1,3 +1,13 @@
+tcpflow (0.21-10) unstable; urgency=low
+
+  * debian/control:
+    + Set myself as maintainer, not just uploader.
+    + Build-Depend on debhelper (>> 5.0.0), libpcap0.8-dev.
+  * debian/compat: New file.
+  * debian/rules: Don't set DH_COMPAT.
+
+ -- Romain Francoise <rfrancoise@debian.org>  Tue,  3 Oct 2006 08:16:37 +0200
+
 tcpflow (0.21-9) unstable; urgency=low
 
   * Updated Debian Standards version to 3.7.2
@@ -128,8 +138,3 @@ tcpflow (0.12-1) unstable; urgency=low
   * Initial release.
 
  -- Robert McQueen <robert.mcqueen@hands.com>  Sat, 29 Jul 2000 02:16:59 +0100
-
-Local variables:
-mode: debian-changelog
-add-log-mailing-address "skx@debian.org"
-End:

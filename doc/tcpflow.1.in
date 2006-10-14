@@ -59,14 +59,20 @@ unlimited number of bytes per flow.
 .B \-c
 Console print.  Print the contents of packets to stdout as they
 are received, without storing any captured data to files (implies
-.TP
-.B \-C
-Console print without the packet source and destination details being printed.  Print the contents of packets to stdout as they
-are received, without storing any captured data to files (implies
-.B \-e
-When outputting to the console each flow will be output in alternating colours.
 .B -s
 ).
+.TP
+.B \-C
+Console print without the packet source and destination details being
+printed.  Print the contents of packets to stdout as they are received,
+without storing any captured data to files (implies
+.B -s
+).
+.TP
+.B \-e
+When outputting to the console each flow will be output in different
+colors (blue for client to server flows, red for server to client flows,
+green for undecided flows).
 .TP
 .B \-d
 Debug level.  Set the level of debugging messages printed to stderr to

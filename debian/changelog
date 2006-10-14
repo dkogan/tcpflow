@@ -1,3 +1,21 @@
+tcpflow (0.21-11) unstable; urgency=high
+
+  * Fix broken Debian-specific changes:
+    + -C and -c *must* imply -s to strip non-printable characters or
+      network data could end up messing with the terminal; this is
+      potentially a security issue, hence urgency: high.
+    + Reimplement Debian-specific option -e from scratch, the previous
+      implementation was tragically flawed: it assumed that the entirety
+      of the TCP connection would have only two segments, which is of
+      course rarely true...  Do it properly by finding out who's the
+      client and who's the server by examining the TCP handshake. Also
+      mention -e in usage.
+    + Fix spelling errors in Debian-specific patches.
+    + Fix the manpage to make explanations actually match their
+      corresponding options (closes: #392676).
+
+ -- Romain Francoise <rfrancoise@debian.org>  Sat, 14 Oct 2006 16:38:10 +0200
+
 tcpflow (0.21-10) unstable; urgency=low
 
   * debian/control:

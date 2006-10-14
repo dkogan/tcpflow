@@ -70,9 +70,9 @@ int bytes_per_flow = 0;
 int max_flows = 0;
 int max_desired_fds = 0;
 int console_only = 0;
-int supress_header = 0;
+int suppress_header = 0;
 int strip_nonprint = 0;
-int use_colour = 0;
+int use_color = 0;
 
 char error[PCAP_ERRBUF_SIZE];
 
@@ -87,6 +87,7 @@ void print_usage(char *progname)
   fprintf(stderr, "        -c: console print only (don't create files)\n");
   fprintf(stderr, "        -C: console print only, but without the display of source/dest header\n");
   fprintf(stderr, "        -d: debug level; default is %d\n", DEFAULT_DEBUG_LEVEL);
+  fprintf(stderr, "        -e: output each flow in alternating colors\n");
   fprintf(stderr, "        -f: maximum number of file descriptors to use\n");
   fprintf(stderr, "        -h: print this help message\n");
   fprintf(stderr, "        -i: network interface on which to listen\n");
@@ -138,12 +139,13 @@ int main(int argc, char *argv[])
       }
       break;
     case 'C':
-      supress_header = 1;
+      suppress_header = 1;
       DEBUG(10) ("packet header dump suppressed");
+      /* fall through */
     case 'c':
       console_only = 1;
       DEBUG(10) ("printing packets to console only");
-      break;
+      /* fall through */
     case 's':
       strip_nonprint = 1;
       DEBUG(10) ("converting non-printable characters to '.'");
@@ -179,8 +181,8 @@ int main(int argc, char *argv[])
       debug_level = 10;
       break;
     case 'e':
-      use_colour  = 1;
-      DEBUG(10) ("Using colours");
+      use_color  = 1;
+      DEBUG(10) ("using colors");
       break;
     default:
       DEBUG(1) ("error: unrecognized switch '%c'", optopt);

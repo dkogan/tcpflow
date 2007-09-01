@@ -82,10 +82,6 @@ typedef struct flow_state_struct {
 #define FLOW_FINISHED		(1 << 0)
 #define FLOW_FILE_EXISTS	(1 << 1)
 
-/* Direction flags: server to client or client to server. */
-#define FLOW_DIR_SC		(1 << 2)
-#define FLOW_DIR_CS		(1 << 3)
-
 typedef struct flow_state_struct flow_state_t;
 
   
@@ -135,10 +131,9 @@ pcap_handler find_handler(int datalink_type, char *device);
 void process_ip(const u_char *data, u_int32_t length);
 void process_tcp(const u_char *data, u_int32_t length, u_int32_t src,
 		 u_int32_t dst);
-void print_packet(flow_t flow, flow_state_t *state, const u_char *data,
-		  u_int32_t length);
-void store_packet(flow_t flow, flow_state_t *state, const u_char *data,
-		  u_int32_t length, u_int32_t seq, int syn_set);
+void print_packet(flow_t flow, const u_char *data, u_int32_t length);
+void store_packet(flow_t flow, const u_char *data, u_int32_t length,
+		  u_int32_t seq);
 u_char *do_strip_nonprint(const u_char *data, u_int32_t length);
 
 /* flow.c */

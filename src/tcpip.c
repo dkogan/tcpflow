@@ -55,10 +55,8 @@ static char *cvsid = "$Id: tcpip.c,v 1.13 2001/08/24 05:36:14 jelson Exp $";
 #include "tcpflow.h"
 
 extern int console_only;
-extern int suppress_header;
 extern int bytes_per_flow;
 extern int strip_nonprint;
-extern int use_color;
 
 /*************************************************************************/
 
@@ -125,7 +123,6 @@ void process_tcp(const u_char *data, u_int32_t length, u_int32_t src,
   flow_t this_flow;
   u_int tcp_header_len;
   tcp_seq seq;
-  flow_state_t *state;
 
   if (length < sizeof(struct tcphdr)) {
     DEBUG(6) ("received truncated TCP segment!");
@@ -134,6 +131,12 @@ void process_tcp(const u_char *data, u_int32_t length, u_int32_t src,
 
   /* calculate the total length of the TCP header including options */
   tcp_header_len = tcp_header->th_off * 4;
+
+  /* return if this packet doesn't have any data (e.g., just an ACK) */
+  if (length <= tcp_header_len) {
+    DEBUG(50) ("got TCP segment with no data");
+    return;
+  }
 
   /* fill in the flow_t structure with info that identifies this flow */
   this_flow.src = src;
@@ -147,37 +150,15 @@ void process_tcp(const u_char *data, u_int32_t length, u_int32_t src,
   data += tcp_header_len;
   length -= tcp_header_len;
 
-  /* see if we have state about this flow; if not, create it */
-  if ((state = find_flow_state(this_flow)) == NULL) {
-    state = create_flow_state(this_flow, seq);
-  }
-
-  /* Handle empty packets */
-  if (length == 0) {
-    /* examine TCP flags for initial TCP handshake segments:
-     * - SYN means that the flow is a client -> server flow
-     * - SYN/ACK means that the flow is a server -> client flow. */
-    if ((state->isn - seq) == 0) {
-      if (IS_SET(tcp_header->th_flags, TH_SYN)
-	  && IS_SET(tcp_header->th_flags, TH_ACK))
-	SET_BIT(state->flags, FLOW_DIR_SC);
-      else if (IS_SET(tcp_header->th_flags, TH_SYN))
-	SET_BIT(state->flags, FLOW_DIR_CS);
-    }
-    DEBUG(50) ("got TCP segment with no data");
-    return;
-  }
-
   /* strip nonprintable characters if necessary */
   if (strip_nonprint)
     data = do_strip_nonprint(data, length);
 
   /* store or print the output */
   if (console_only) {
-    print_packet(this_flow, state, data, length);
+    print_packet(this_flow, data, length);
   } else {
-    store_packet(this_flow, state, data, length, seq,
-		 IS_SET(tcp_header->th_flags, TH_SYN));
+    store_packet(this_flow, data, length, seq);
   }
 }
 
@@ -205,45 +186,27 @@ u_char *do_strip_nonprint(const u_char *data, u_int32_t length)
 
 
 /* print the contents of this packet to the console */
-void print_packet(flow_t flow, flow_state_t *state, const u_char *data,
-		  u_int32_t length)
+void print_packet(flow_t flow, const u_char *data, u_int32_t length)
 {
-  int current_color = 0;
-
-  /* Colors: green, blue, red */
-  char *color[3] = { "\033[0;32m", "\033[0;34m", "\033[0;31m" };
-
-  if (use_color) {
-    if (IS_SET(state->flags, FLOW_DIR_CS))
-      current_color = 1;
-    else if (IS_SET(state->flags, FLOW_DIR_SC))
-      current_color = 2;
-    printf("%s", color[current_color]);
-  }
-
-  if (suppress_header == 0)
-    printf("%s: ", flow_filename(flow));
-
+  printf("%s: ", flow_filename(flow));
   fwrite(data, length, 1, stdout);
-
-  if (use_color)
-    printf("\033[0m");
-
   putchar('\n');
   fflush(stdout);
 }
 
 
 /* store the contents of this packet to its place in its file */
-void store_packet(flow_t flow, flow_state_t *state, const u_char *data,
-		  u_int32_t length, u_int32_t seq, int syn_set)
+void store_packet(flow_t flow, const u_char *data, u_int32_t length,
+		  u_int32_t seq)
 {
+  flow_state_t *state;
   tcp_seq offset;
   long fpos;
 
-  /* If we got a SYN reset the sequence number */
-  if (syn_set)
-    state->isn = seq - state->pos + 1;
+  /* see if we have state about this flow; if not, create it */
+  if ((state = find_flow_state(flow)) == NULL) {
+    state = create_flow_state(flow, seq);
+  }
 
   /* if we're done collecting for this flow, return now */
   if (IS_SET(state->flags, FLOW_FINISHED))

@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Romain Francoise <rfrancoise@debian.org>
 Standards-Version: 3.7.2
-Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, automake1.7
+Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, quilt (>= 0.40), autotools-dev
 
 Package: tcpflow
 Architecture: any

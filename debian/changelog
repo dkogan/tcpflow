@@ -1,3 +1,20 @@
+tcpflow (0.21-12) unstable; urgency=low
+
+  * Convert to quilt for patch management:
+    + debian/control: build-depend on quilt (>= 0.40).
+    + debian/rules: Include /usr/share/quilt/quilt.make and call quilt
+      targets.
+
+  * Split monolithic Debian diff:
+    + debian/patches/10_extra-opts.diff: Add options -C and -e.
+    + debian/patches/50_autotools-dev.diff: Make config.{guess,sub}
+      exec newer versions of themselves if autotools-dev is installed.
+
+  * debian/control: Don't build-depend on automake1.7, but on autotools-dev.
+  * debian/rules: Don't reconf.  Major cleanup.
+
+ -- Romain Francoise <rfrancoise@debian.org>  Sat, 01 Sep 2007 12:49:18 +0200
+
 tcpflow (0.21-11) unstable; urgency=high
 
   * Fix broken Debian-specific changes:

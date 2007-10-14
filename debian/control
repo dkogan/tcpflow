@@ -4,6 +4,9 @@ Priority: optional
 Maintainer: Romain Francoise <rfrancoise@debian.org>
 Standards-Version: 3.7.2
 Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, quilt (>= 0.40), autotools-dev
+Homepage: http://www.circlemud.org/~jelson/software/tcpflow/
+Vcs-Browser: http://git.debian.org/?p=users/rfrancoise/tcpflow.git
+Vcs-Git: git://git.debian.org/git/users/rfrancoise/tcpflow.git
 
 Package: tcpflow
 Architecture: any

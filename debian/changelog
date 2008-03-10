@@ -1,3 +1,9 @@
+tcpflow (0.21.ds1-2) unstable; urgency=low
+
+  * debian/control: Bump Standards-Version to 3.7.3, no changes needed.
+
+ -- Romain Francoise <rfrancoise@debian.org>  Mon, 10 Mar 2008 21:14:36 +0100
+
 tcpflow (0.21.ds1-1) unstable; urgency=low
 
   * Repack tarball from Git.

@@ -1,7 +1,7 @@
 Add new options -C and -e requested by Debian users.
 
---- tcpflow-0.21.orig/src/main.c
-+++ tcpflow-0.21/src/main.c
+--- a/src/main.c
++++ b/src/main.c
 @@ -70,7 +70,9 @@
  int max_flows = 0;
  int max_desired_fds = 0;
@@ -53,8 +53,8 @@ Add new options -C and -e requested by Debian users.
      default:
        DEBUG(1) ("error: unrecognized switch '%c'", optopt);
        need_usage = 1;
---- tcpflow-0.21.orig/src/tcpip.c
-+++ tcpflow-0.21/src/tcpip.c
+--- a/src/tcpip.c
++++ b/src/tcpip.c
 @@ -55,8 +55,10 @@
  #include "tcpflow.h"
  
@@ -87,7 +87,7 @@ Add new options -C and -e requested by Debian users.
    /* fill in the flow_t structure with info that identifies this flow */
    this_flow.src = src;
    this_flow.dst = dst;
-@@ -150,15 +147,37 @@
+@@ -150,15 +147,45 @@
    data += tcp_header_len;
    length -= tcp_header_len;
  
@@ -103,10 +103,18 @@ Add new options -C and -e requested by Debian users.
 +     * - SYN/ACK means that the flow is a server -> client flow. */
 +    if ((state->isn - seq) == 0) {
 +      if (IS_SET(tcp_header->th_flags, TH_SYN)
-+	  && IS_SET(tcp_header->th_flags, TH_ACK))
++	  && IS_SET(tcp_header->th_flags, TH_ACK)) {
 +	SET_BIT(state->flags, FLOW_DIR_SC);
-+      else if (IS_SET(tcp_header->th_flags, TH_SYN))
++	DEBUG(50) ("packet is handshake SYN/ACK");
++	/* If the SYN flag is set the first data byte is offset by one,
++	   account for it (note: if we're here we have just created
++	   state, so it's safe to change isn). */
++	state->isn++;
++      } else if (IS_SET(tcp_header->th_flags, TH_SYN)) {
 +	SET_BIT(state->flags, FLOW_DIR_CS);
++	DEBUG(50) ("packet is handshake SYN");
++	state->isn++;
++      }
 +    }
 +    DEBUG(50) ("got TCP segment with no data");
 +    return;
@@ -127,7 +135,7 @@ Add new options -C and -e requested by Debian users.
    }
  }
  
-@@ -186,27 +205,45 @@
+@@ -186,26 +213,46 @@
  
  
  /* print the contents of this packet to the console */
@@ -175,15 +183,15 @@ Add new options -C and -e requested by Debian users.
 -  /* see if we have state about this flow; if not, create it */
 -  if ((state = find_flow_state(flow)) == NULL) {
 -    state = create_flow_state(flow, seq);
--  }
 +  /* If we got a SYN reset the sequence number */
-+  if (syn_set)
++  if (syn_set) {
++    DEBUG(50) ("resetting isn due to extra SYN");
 +    state->isn = seq - state->pos + 1;
+   }
  
    /* if we're done collecting for this flow, return now */
-   if (IS_SET(state->flags, FLOW_FINISHED))
---- tcpflow-0.21.orig/src/tcpflow.h
-+++ tcpflow-0.21/src/tcpflow.h
+--- a/src/tcpflow.h
++++ b/src/tcpflow.h
 @@ -82,6 +82,10 @@
  #define FLOW_FINISHED		(1 << 0)
  #define FLOW_FILE_EXISTS	(1 << 1)
@@ -209,8 +217,8 @@ Add new options -C and -e requested by Debian users.
  u_char *do_strip_nonprint(const u_char *data, u_int32_t length);
  
  /* flow.c */
---- tcpflow-0.21.orig/doc/tcpflow.1.in
-+++ tcpflow-0.21/doc/tcpflow.1.in
+--- a/doc/tcpflow.1.in
++++ b/doc/tcpflow.1.in
 @@ -6,7 +6,7 @@
  .na
  .B tcpflow

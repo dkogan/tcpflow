@@ -1,3 +1,11 @@
+tcpflow (0.21.ds1-3) unstable; urgency=low
+
+  * debian/patches/10_extra-opts.diff: Fix off-by-one error in handling of
+    isn, the handshake SYN packet counts for one but doesn't contain data
+    (closes: #477163).
+
+ -- Romain Francoise <rfrancoise@debian.org>  Thu, 01 May 2008 13:54:05 +0200
+
 tcpflow (0.21.ds1-2) unstable; urgency=low
 
   * debian/control: Bump Standards-Version to 3.7.3, no changes needed.

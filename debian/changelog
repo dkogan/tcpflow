@@ -1,3 +1,11 @@
+tcpflow (0.21.ds1-4) unstable; urgency=low
+
+  * debian/patches/20_fix-usage.diff: New patch, fixes wrong usage output
+    (closes: #499158).
+  * debian/control: Bump Standards-Version to 3.8.2, no changes needed.
+
+ -- Romain Francoise <rfrancoise@debian.org>  Sun, 21 Jun 2009 19:22:28 +0200
+
 tcpflow (0.21.ds1-3) unstable; urgency=low
 
   * debian/patches/10_extra-opts.diff: Fix off-by-one error in handling of

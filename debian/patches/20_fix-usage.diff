@@ -1,0 +1,15 @@
+---
+ src/main.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/src/main.c
++++ b/src/main.c
+@@ -82,7 +82,7 @@
+   fprintf(stderr, "%s version %s by Jeremy Elson <jelson@circlemud.org>\n\n",
+ 		 PACKAGE, VERSION);
+   fprintf(stderr, "usage: %s [-chpsv] [-b max_bytes] [-d debug_level] [-f max_fds]\n", progname);
+-  fprintf(stderr, "          [-i iface] [-w file] [expression]\n\n");
++  fprintf(stderr, "          [-i iface] [-r file] [expression]\n\n");
+   fprintf(stderr, "        -b: max number of bytes per flow to save\n");
+   fprintf(stderr, "        -c: console print only (don't create files)\n");
+   fprintf(stderr, "        -C: console print only, but without the display of source/dest header\n");

@@ -1,3 +1,20 @@
+tcpflow (0.21.ds1-5) unstable; urgency=low
+
+  * Switch to 3.0 (quilt) source format:
+    + Drop build-depends on quilt.
+    + Remove patch/unpatch logic from debian/rules.
+    + Refresh all patches.
+  * Use dh(1):
+    + debian/compat: Bump to 7.
+    + debian/control: Build-depend on debhelper (>> 7).
+    + debian/rules: Simplify.
+  * debian/patches/10_vlan.diff: New patch, makes tcpflow skip VLAN
+    headers if present (closes: #536792).
+  * debian/patches/series: Update.
+  * debian/control: Bump Standards-Version to 3.8.3, no changes needed.
+
+ -- Romain Francoise <rfrancoise@debian.org>  Mon, 09 Nov 2009 19:55:38 +0100
+
 tcpflow (0.21.ds1-4) unstable; urgency=low
 
   * debian/patches/20_fix-usage.diff: New patch, fixes wrong usage output

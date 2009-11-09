@@ -1,0 +1,96 @@
+Skip VLAN headers in packets, if any.
+
+See http://blog.vorant.com/2008/02/nsm-and-vlans.html for context,
+patch from http://www.vorant.com/files/tcpflow-0.21-vlan-patch
+---
+ src/datalink.c |   31 ++++++++++++++++++++++++++++---
+ src/main.c     |   12 ++++++++----
+ 2 files changed, 36 insertions(+), 7 deletions(-)
+
+--- a/src/datalink.c
++++ b/src/datalink.c
+@@ -82,16 +82,36 @@
+ }
+ 
+ 
++/* 802.1Q VLAN tags are 4 bytes long. */
++#define VLAN_HDRLEN 4
++
++/* This is the decimal equivalent of the VLAN tag's ether frame type */
++#define VLAN_ETHERTYPE 33024
++
+ 
+ /* Ethernet datalink handler; used by all 10 and 100 mbit/sec
+  * ethernet.  We are given the entire ethernet header so we check to
+  * make sure it's marked as being IP. */
++
++/* Update - david@vorant.com  16 June 2005 
++ * Try to detect whether the packet has an 802.1Q VLAN tag on it.  If so,
++ * try to automatically skip the tag and treat it as regular TCP/IP traffic.
++ * Otherwise the handler won't process the packet.  This is useful when,
++ * for example, you are monitoring a VLAN trunk line.
++ */
++
+ void dl_ethernet(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
+ {
+   u_int caplen = h->caplen;
+   u_int length = h->len;
++  int vlan = 0;  /* If this is 1, we're skipping VLAN tags */
++
+   struct ether_header *eth_header = (struct ether_header *) p;
+ 
++  if (eth_header && ntohs(eth_header->ether_type) == VLAN_ETHERTYPE) {
++    /* strip the vlan tags */
++    vlan = 1;
++  }
+   if (length != caplen) {
+     DEBUG(6) ("warning: only captured %d bytes of %d byte ether frame",
+ 	  caplen, length);
+@@ -103,14 +123,19 @@
+   }
+ 
+   /* we're only expecting IP datagrams, nothing else */
+-  if (ntohs(eth_header->ether_type) != ETHERTYPE_IP) {
++  if ((ntohs(eth_header->ether_type) != ETHERTYPE_IP) && (vlan != 1)) {
+     DEBUG(6) ("warning: received ethernet frame with unknown type %x",
+ 	  ntohs(eth_header->ether_type));
+     return;
+   }
+ 
+-  process_ip(p + sizeof(struct ether_header),
+-	     caplen - sizeof(struct ether_header));
++  if (vlan == 1) {
++    process_ip(p + sizeof(struct ether_header) + VLAN_HDRLEN,
++	       caplen - sizeof(struct ether_header) - VLAN_HDRLEN);
++  } else {
++    process_ip(p + sizeof(struct ether_header),
++	       caplen - sizeof(struct ether_header));
++  }
+ }
+ 
+ 
+--- a/src/main.c
++++ b/src/main.c
+@@ -233,14 +233,18 @@
+   /* get the user's expression out of argv */
+   expression = copy_argv(&argv[optind]);
+ 
+-  /* add 'ip' to the user-specified filtering expression (if any) to
+-   * prevent non-ip packets from being delivered. */
++  /* add 'ip or vlan' to the user-specified filtering expression (if any) to
++   * prevent non-ip packets from being delivered. The "vlan" part ensures
++   * that we'll try to decode these packets in the pcap_loop.  IT MUST BE
++   * "ip or vlan" and NOT the other way around due to the way libpcap 
++   * handles the vlan keyword.
++   */
+   if (expression == NULL) {
+-    expression = "ip";
++    expression = "(ip or vlan)"; 
+     user_expression = 0;
+   } else {
+     char *new_expression = MALLOC(char, strlen(expression) + 30);
+-    sprintf(new_expression, "(ip) and (%s)", expression);
++    sprintf(new_expression, "(ip or vlan) and (%s)", expression);
+     free(expression);
+     expression = new_expression;
+     user_expression = 1;

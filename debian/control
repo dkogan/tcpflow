@@ -2,7 +2,7 @@ Source: tcpflow
 Section: net
 Priority: optional
 Maintainer: Romain Francoise <rfrancoise@debian.org>
-Standards-Version: 3.8.2
+Standards-Version: 3.8.3
 Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, quilt (>= 0.40), autotools-dev
 Homepage: http://www.circlemud.org/~jelson/software/tcpflow/
 Vcs-Browser: http://git.debian.org/?p=users/rfrancoise/tcpflow.git

@@ -1,5 +1,12 @@
 Add new options -C and -e requested by Debian users.
 
+---
+ doc/tcpflow.1.in |   14 +++++++++
+ src/main.c       |   14 +++++++++
+ src/tcpflow.h    |   11 +++++--
+ src/tcpip.c      |   79 +++++++++++++++++++++++++++++++++++++++++++------------
+ 4 files changed, 97 insertions(+), 21 deletions(-)
+
 --- a/src/main.c
 +++ b/src/main.c
 @@ -70,7 +70,9 @@

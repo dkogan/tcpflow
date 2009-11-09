@@ -1,5 +1,10 @@
---- tcpflow-0.21.orig/config.guess
-+++ tcpflow-0.21/config.guess
+---
+ config.guess |    5 +++++
+ config.sub   |    5 +++++
+ 2 files changed, 10 insertions(+)
+
+--- a/config.guess
++++ b/config.guess
 @@ -1,4 +1,9 @@
  #! /bin/sh
 +
@@ -10,8 +15,8 @@
  # Attempt to guess a canonical system name.
  #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
  #   Free Software Foundation, Inc.
---- tcpflow-0.21.orig/config.sub
-+++ tcpflow-0.21/config.sub
+--- a/config.sub
++++ b/config.sub
 @@ -1,4 +1,9 @@
  #! /bin/sh
 +

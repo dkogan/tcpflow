@@ -3,14 +3,14 @@ Section: net
 Priority: optional
 Maintainer: Romain Francoise <rfrancoise@debian.org>
 Standards-Version: 3.8.3
-Build-Depends: debhelper (>> 5.0.0), libpcap0.8-dev, quilt (>= 0.40), autotools-dev
+Build-Depends: debhelper (>> 7), libpcap0.8-dev, autotools-dev
 Homepage: http://www.circlemud.org/~jelson/software/tcpflow/
 Vcs-Browser: http://git.debian.org/?p=users/rfrancoise/tcpflow.git
 Vcs-Git: git://git.debian.org/git/users/rfrancoise/tcpflow.git
 
 Package: tcpflow
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: tcpdump
 Description: TCP flow recorder
  tcpflow is a program that captures data transmitted as part of TCP

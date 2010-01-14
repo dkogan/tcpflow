@@ -1,4 +1,3 @@
 10_extra-opts.diff 
-10_vlan.diff
 20_fix-usage.diff
 50_autotools-dev.diff

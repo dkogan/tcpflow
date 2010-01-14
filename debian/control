@@ -3,7 +3,8 @@ Section: net
 Priority: optional
 Maintainer: Romain Francoise <rfrancoise@debian.org>
 Standards-Version: 3.8.3
-Build-Depends: debhelper (>> 7), libpcap0.8-dev, autotools-dev
+Build-Depends: debhelper (>> 7), libpcap0.8-dev, autotools-dev,
+               hardening-includes
 Homepage: http://www.circlemud.org/~jelson/software/tcpflow/
 Vcs-Browser: http://git.debian.org/?p=users/rfrancoise/tcpflow.git
 Vcs-Git: git://git.debian.org/git/users/rfrancoise/tcpflow.git

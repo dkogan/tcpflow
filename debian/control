@@ -1,7 +1,7 @@
 Source: tcpflow
 Section: net
 Priority: optional
-Maintainer: Romain Francoise <rfrancoise@debian.org>
+Maintainer: Debian QA Group <packages@qa.debian.org>
 Standards-Version: 3.9.3
 Build-Depends: dpkg-dev (>= 1.16.1~),
                debhelper (>= 8.9.4~),

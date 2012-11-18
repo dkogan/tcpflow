@@ -38,7 +38,7 @@ Package: tcpflow-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Depends: ${misc:Depends}, tcpflow(= ${binary:Version})
+Depends: ${misc:Depends}, tcpflow (= ${binary:Version})
 Description: TCP flow recorder - debug symbols
  tcpflow is a program that captures data transmitted as part of TCP
  connections (flows), and stores the data in a way that is convenient

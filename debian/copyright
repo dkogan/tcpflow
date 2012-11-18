@@ -1,23 +1,21 @@
-tcpflow was packaged for Debian
-by Robert McQueen <robot101@debian.org> on
-Sat, 29 Jul 2000 02:16:59 +0100.
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: http://www.afflib.org/software/tcpflow/
+Upstream-Contact: Simson Garfinkel <simsong@acm.org>
+Upstream-Name: tcpflow
 
-It was downloaded from:
- http://www.circlemud.org/~jelson/software/tcpflow/
+Files: *
+Copyright: 1999-2003 Jeremy Elson <jelson@circlemud.org>
+           2012 Simson Garfinkel <simsong@acm.org>
+License: GPL
 
-The upstream contributors are listed in the AUTHORS file.
+Files: debian/*
+Copyright: 2012 Dima Kogan
+License: GPL
 
-Copyright (C) 1999-2003 Jeremy Elson <jelson@circlemud.org>
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of
-the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-On Debian systems, the complete text of the GNU General Public
-License can be found in /usr/share/common-licenses/GPL file.
+License: GPL
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation; either version 1, or (at your option) any later version.
+ .
+ On Debian GNU/Linux systems, the complete text of version 1 of the General
+ Public License can be found in `/usr/share/common-licenses/GPL-1'.

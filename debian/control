@@ -5,6 +5,7 @@ Maintainer: Dima Kogan <dima@secretsauce.net>
 Standards-Version: 3.9.4
 Build-Depends: debhelper (>= 9),
                libpcap0.8-dev,
+               zlib1g,
                autotools-dev
 Homepage: http://www.afflib.org/software/tcpflow/
 Vcs-Browser: http://git.debian.org/?p=users/dkogan-guest/tcpflow.git

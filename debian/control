@@ -36,6 +36,7 @@ Description: TCP flow recorder
 
 Package: tcpflow-dbg
 Section: debug
+Priority: extra
 Architecture: any
 Depends: ${misc:Depends}, tcpflow(= ${binary:Version})
 Description: TCP flow recorder - debug symbols

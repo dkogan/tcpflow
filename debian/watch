@@ -1,2 +1,2 @@
 version = 3
-https://github.com/simsong/tcpflow/tags .*/tarball/v(\d[\d\.]+)
+https://github.com/simsong/tcpflow/tags .*/tcpflow/archive/tcpflow-(\d[\d\.]+).tar.gz

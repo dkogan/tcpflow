@@ -1,6 +1,7 @@
 From: Dima Kogan <dima@secretsauce.net>
 Date: Sun, 18 Nov 2012 01:39:41 -0800
 Subject: better test failure reporting if openssl not installed
+Forwarded: https://github.com/simsong/tcpflow/issues/14
 
 ---
  tests/test1.sh |    4 ++--

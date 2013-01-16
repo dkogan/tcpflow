@@ -1,11 +1,7 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@
-
-override_dh_auto_configure:
-	sh bootstrap.sh
-	dh_auto_configure
+	dh $@ --with autoreconf
 
 override_dh_strip:
 	dh_strip --dbg-package=tcpflow-dbg

@@ -6,7 +6,7 @@ Standards-Version: 3.9.4
 Build-Depends: debhelper (>= 9),
                libpcap0.8-dev,
                zlib1g,
-               automake,
+               dh-autoreconf,
 # openssl dependency is for the test suite
                openssl
 Homepage: http://www.afflib.org/software/tcpflow/

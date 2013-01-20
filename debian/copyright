@@ -9,16 +9,36 @@ Comment: The upstream source has been made DFSG-compatible by removing
 Files: *
 Copyright: 1999-2003 Jeremy Elson <jelson@circlemud.org>
            2012 Simson Garfinkel <simsong@acm.org>
-License: GPL
+License: GPL-3
+
+Files: src/net_ethernet.h
+Copyright: 1997, 1999, 2001, 2008 Free Software Foundation, Inc.
+License: LGPL-2.1+
+
+Files: src/md5.*
+       src/xml.cpp
+License: Public Domain
 
 Files: debian/*
-Copyright: 2012 Dima Kogan
-License: GPL
+Copyright: 2012 Dima Kogan <dima@secretsauce.net>
+           2000 Robert McQueen <robot101@debian.org>
+           2006-2010 Romain Francoise <rfrancoise@debian.org>
+License: GPL-3
 
-License: GPL
+License: GPL-3
  This program is free software; you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation; either version 1, or (at your option) any later version.
+ the terms of the GNU General Public License (version 3) as published by the
+ Free Software Foundation.
  .
- On Debian GNU/Linux systems, the complete text of version 1 of the General
- Public License can be found in `/usr/share/common-licenses/GPL-1'.
+ On Debian GNU/Linux systems, the complete text of version 3 of the General
+ Public License can be found in `/usr/share/common-licenses/GPL-3'.
+
+License: LGPL-2.1+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option) any
+ later version.
+ .
+ On Debian GNU/Linux systems, the complete text of version 2.1 of the Lesser
+ General Public License can be found in `/usr/share/common-licenses/LGPL-2.1'.
+

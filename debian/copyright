@@ -2,6 +2,9 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: http://www.afflib.org/software/tcpflow/
 Upstream-Contact: Simson Garfinkel <simsong@acm.org>
 Upstream-Name: tcpflow
+Comment: The upstream source has been made DFSG-compatible by removing
+  inet_ntop.c from the source tree. This file was not licensed under a
+  GPL-compatible license, and wasn't used in Debian systems anyway.
 
 Files: *
 Copyright: 1999-2003 Jeremy Elson <jelson@circlemud.org>

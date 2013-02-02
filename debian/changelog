@@ -4,8 +4,13 @@ tcpflow (1.3.0+dfsg-1) experimental; urgency=low
   * Package now follows new upstream:
     http://www.afflib.org/software/tcpflow/ . This fixes several bugs:
     (Closes: #636922, #536792, #611047, #636212)
-
- -- Dima Kogan <dima@secretsauce.net>  Thu, 29 Nov 2012 23:09:18 -0800
+  * Updated debianization
+    - moved to debhelper v9, so debian/rules is now much simpler
+    - added watch files
+    - expanded debian/copyright
+    - now building a tcpflow-dbg package
+  
+ -- Dima Kogan <dima@secretsauce.net>  Sat, 02 Feb 2013 02:16:53 -0800
 
 tcpflow (0.21.ds1-7) unstable; urgency=low
 

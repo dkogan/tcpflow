@@ -15,6 +15,7 @@ Vcs-Git: git://anonscm.debian.org/collab-maint/tcpflow.git
 
 Package: tcpflow
 Architecture: any
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: tcpdump
 Description: TCP flow recorder

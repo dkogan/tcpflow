@@ -1,3 +1,10 @@
+tcpflow (1.3.0+dfsg-2) unstable; urgency=low
+
+  * updated upstream URL
+  * Package moved to unstable
+
+ -- Dima Kogan <dima@secretsauce.net>  Sun, 07 Jul 2013 18:09:31 -0700
+
 tcpflow (1.3.0+dfsg-1) experimental; urgency=low
 
   * New Maintainer (Closes: #673637)

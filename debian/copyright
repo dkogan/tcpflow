@@ -1,5 +1,5 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: http://www.afflib.org/software/tcpflow/
+Source: https://github.com/simsong/tcpflow
 Upstream-Contact: Simson Garfinkel <simsong@acm.org>
 Upstream-Name: tcpflow
 Comment: The upstream source has been made DFSG-compatible by removing

@@ -20,6 +20,13 @@ grenew:
 	automake --add-missing -c
 
 
+# For testing:
+pdft:	
+	(cd src;make tcpflow)
+	/bin/rm -rf out
+	src/tcpflow -a -o out -r /corp/nps/packets/2008-nitroba/nitroba.pcap -w out/extra.pcap
+	open out/report.pdf
+
 #
 # AFFLIB RELEASE SYSTEM V1.0 FOLLOWS
 #
@@ -32,9 +39,6 @@ RELEASE_LOC  = $(RELEASE_DIR)/downloads/
 VERSION_FN   = $(PACKAGE)_version.txt
 RELEASE_PATH = $(RELEASE_LOC)/$(VERSION_FN)
 RELEASE_SSH  = $(RELEASE_USER)$(RELEASE_HOST):$(RELEASE_LOC)
-RELEASE_VER  = $(PACKAGE)-$(VERSION_FN)
-RELEASEFN    = $(PACKAGE)-$(VERSION).tar.gz
-PACKAGEFN    = $(PACKAGE).tar.gz
 
 
 release:
@@ -57,13 +61,14 @@ tcpflow64.exe:
 	make clean
 	make 
 
+FN=$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 winrelease:
-	/bin/rm -f tcpflow*.exe tcpflow-$(RELEASE_VER).zip
+	/bin/rm -f tcpflow*.exe $(FN).zip
 	make tcpflow32.exe
 	mv -f src/tcpflow.exe tcpflow32.exe
 	make tcpflow64.exe
 	mv -f src/tcpflow.exe tcpflow64.exe
-	zip tcpflow-$(RELEASE_VER).zip tcpflow*.exe
+	zip $(FN).zip tcpflow*.exe
 
 
 #

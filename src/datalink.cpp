@@ -1,48 +1,26 @@
-/*
- * This file is part of tcpflow by Jeremy Elson <jelson@circlemud.org>
+
+/**
+ * 
+ * This file is part of tcpflow. Originally by Jeremy Elson
+ * <jelson@circlemud.org>, rewritten by Simson Garfinkel.
+ *
  * Initial Release: 7 April 1999.
  *
  * This source code is under the GNU Public License (GPL).  See
  * LICENSE for details.
  *
- * $Id: datalink.c,v 1.8 2002/03/29 23:18:51 jelson Exp $
- *
- * $Log: datalink.c,v $
- * Revision 1.8  2002/03/29 23:18:51  jelson
- * oops... fixed typo
- *
- * Revision 1.7  2002/03/29 22:31:16  jelson
- * Added support for ISDN (/dev/ippp0), datalink handler for
- * DLT_LINUX_SLL.  Contributed by Detlef Conradin <dconradin at gmx.net>
- *
- * Revision 1.6  1999/04/21 01:40:13  jelson
- * DLT_NULL fixes, u_char fixes, additions to configure.in, man page update
- *
- * Revision 1.5  1999/04/20 19:39:18  jelson
- * changes to fix broken localhost (DLT_NULL) handling
- *
- * Revision 1.4  1999/04/13 23:17:55  jelson
- * More portability fixes.  All system header files now conditionally
- * included from sysdep.h.
- *
- * Integrated patch from Johnny Tevessen <j.tevessen@gmx.net> for Linux
- * systems still using libc5.
- *
- * Revision 1.3  1999/04/13 01:38:10  jelson
- * Added portability features with 'automake' and 'autoconf'.  Added AUTHORS,
- * NEWS, README, etc files (currently empty) to conform to GNU standards.
- *
- * Various portability fixes, including the FGETPOS/FSETPOS macros; detection
- * of header files using autoconf; restructuring of debugging code to not
- * need vsnprintf.
- *
+ * This file contains datalink handlers which are called by the pcap callback.
+ * The purpose of each handler is to make a packet_info() object and then call
+ * process_packet_info. The packet_info() object contains both the original
+ * MAC-layer (with some of the fields broken out) and the packet data layer.
  */
 
 #include "tcpflow.h"
 
 /* The DLT_NULL packet header is 4 bytes long. It contains a network
  * order 32 bit integer that specifies the family, e.g. AF_INET.
- * DLT_NULL is used by the localhost interface. */
+ * DLT_NULL is used by the localhost interface.
+ */
 #define	NULL_HDRLEN 4
 
 /* Some systems hasn't defined ETHERTYPE_IPV6 */
@@ -50,12 +28,14 @@
 # define ETHERTYPE_IPV6 0x86DD
 #endif
 
+int32_t datalink_tdelta = 0;
+
+#pragma GCC diagnostic ignored "-Wcast-align"
 void dl_null(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 {
-    tcpdemux &demux = *(tcpdemux *)user;
     u_int caplen = h->caplen;
     u_int length = h->len;
-    uint32_t family = *(uint32_t *)p;;
+    uint32_t family = *(uint32_t *)p;
 
     if (length != caplen) {
 	DEBUG(6) ("warning: only captured %d bytes of %d byte null frame",
@@ -73,34 +53,48 @@ void dl_null(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
      */
 #ifndef DLT_NULL_BROKEN
     /* make sure this is AF_INET */
-    //memcpy((char *)&family, (char *)p, sizeof(family));
-    //family = ntohl(family);
     if (family != AF_INET && family != AF_INET6) {
 	DEBUG(6)("warning: received null frame with unknown type (type 0x%x) (AF_INET=%x; AF_INET6=%x)",
 		 family,AF_INET,AF_INET6);
 	return;
     }
 #endif
-
-    demux.process_ip(&h->ts,p + NULL_HDRLEN, caplen - NULL_HDRLEN,flow::NO_VLAN);
+    struct timeval tv;
+    be13::packet_info pi(DLT_NULL,h,p,tvshift(tv,h->ts),p+NULL_HDRLEN,caplen - NULL_HDRLEN);
+    be13::plugin::process_packet_info(pi);
 }
+#pragma GCC diagnostic warning "-Wcast-align"
 
-
+uint64_t counter=0;
+/* DLT_RAW: just a raw IP packet, no encapsulation or link-layer
+ * headers.  Used for PPP connections under some OSs including Linux
+ * and IRIX. */
+void dl_raw(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
+{
+    if (h->caplen != h->len) {
+	DEBUG(6) ("warning: only captured %d bytes of %d byte raw frame",
+		  h->caplen, h->len);
+    }
+    struct timeval tv;
+    be13::packet_info pi(DLT_RAW,h,p,tvshift(tv,h->ts),p, h->caplen);
+    counter++;
+    be13::plugin::process_packet_info(pi);
+}
 
 /* Ethernet datalink handler; used by all 10 and 100 mbit/sec
  * ethernet.  We are given the entire ethernet header so we check to
- * make sure it's marked as being IP. */
+ * make sure it's marked as being IP.
+ */
+#pragma GCC diagnostic ignored "-Wcast-align"
 void dl_ethernet(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 {
-    tcpdemux &demux = *(tcpdemux *)user;
     u_int caplen = h->caplen;
     u_int length = h->len;
-    struct ether_header *eth_header = (struct ether_header *) p;
+    struct be13::ether_header *eth_header = (struct be13::ether_header *) p;
 
     /* Variables to support VLAN */
-    int32_t vlan = flow::NO_VLAN;			       /* default is no vlan */
     const u_short *ether_type = &eth_header->ether_type; /* where the ether type is located */
-    const u_char *ether_data = p+sizeof(struct ether_header); /* where the data is located */
+    const u_char *ether_data = p+sizeof(struct be13::ether_header); /* where the data is located */
 
     if (length != caplen) {
 	DEBUG(6) ("warning: only captured %d bytes of %d byte ether frame",
@@ -109,57 +103,59 @@ void dl_ethernet(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 
     /* Handle basic VLAN packets */
     if (ntohs(*ether_type) == ETHERTYPE_VLAN) {
-	vlan = ntohs(*(u_short *)(p+sizeof(struct ether_header)));
+	//vlan = ntohs(*(u_short *)(p+sizeof(struct ether_header)));
 	ether_type += 2;			/* skip past VLAN header (note it skips by 2s) */
 	ether_data += 4;			/* skip past VLAN header */
 	caplen     -= 4;
     }
   
-    if (caplen < sizeof(struct ether_header)) {
+    if (caplen < sizeof(struct be13::ether_header)) {
 	DEBUG(6) ("warning: received incomplete ethernet frame");
 	return;
     }
 
-    /* switch on ether type */
+    /* Create a packet_info structure with ip data and data length  */
+    struct timeval tv;
+    be13::packet_info pi(DLT_IEEE802,h,p,tvshift(tv,h->ts),
+                         ether_data, caplen - sizeof(struct be13::ether_header));
     switch (ntohs(*ether_type)){
     case ETHERTYPE_IP:
     case ETHERTYPE_IPV6:
-	demux.process_ip(&h->ts,ether_data, caplen - sizeof(struct ether_header),vlan);
-	return;
+        be13::plugin::process_packet_info(pi);
+        break;
+
+#ifdef ETHERTYPE_ARP
     case ETHERTYPE_ARP:
+        /* What should we do for ARP? */
+        break;
+#endif
+#ifdef ETHERTYPE_LOOPBACK
     case ETHERTYPE_LOOPBACK:
+        /* What do do for loopback? */
+        break;
+#endif
+#ifdef ETHERTYPE_REVARP
     case ETHERTYPE_REVARP:
-	return;
+        /* What to do for REVARP? */
+        break;
+#endif
     default:
+        /* Unknown Ethernet Frame Type */
+        DEBUG(6) ("warning: received ethernet frame with unknown type 0x%x", ntohs(eth_header->ether_type));
 	break;
     }
-
-    /* Unknown Ethernet Frame Type */
-    DEBUG(6) ("warning: received ethernet frame with unknown type 0x%x", ntohs(eth_header->ether_type));
 }
 
-#if 0
-u_int16_t ethtype = ntohs(eth_header->ether_type);
-if (ethtype != ETHERTYPE_IP && ethtype != ETHERTYPE_IPV6) {
-    DEBUG(6) ("warning: received ethernet frame with unknown type 0x%x",
-	      ntohs(eth_header->ether_type));
-    return;
- }
-/* Handle basic Ethernet packets */
-if (ntohs(*ether_type) == ETHERTYPE_IP) {
- }
-#endif  
-
-
+#pragma GCC diagnostic warning "-Wcast-align"
 
 /* The DLT_PPP packet header is 4 bytes long.  We just move past it
  * without parsing it.  It is used for PPP on some OSs (DLT_RAW is
- * used by others; see below) */
+ * used by others; see below)
+ */
 #define	PPP_HDRLEN 4
 
 void dl_ppp(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 {
-    tcpdemux &demux = *(tcpdemux *)user;
     u_int caplen = h->caplen;
     u_int length = h->len;
 
@@ -173,31 +169,26 @@ void dl_ppp(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 	return;
     }
 
-    demux.process_ip(&h->ts,p + PPP_HDRLEN, caplen - PPP_HDRLEN,flow::NO_VLAN);
+    struct timeval tv;
+    be13::packet_info pi(DLT_PPP,h,p,tvshift(tv,h->ts),p + PPP_HDRLEN, caplen - PPP_HDRLEN);
+    be13::plugin::process_packet_info(pi);
 }
 
 
-/* DLT_RAW: just a raw IP packet, no encapsulation or link-layer
- * headers.  Used for PPP connections under some OSs including Linux
- * and IRIX. */
-void dl_raw(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
-{
-    tcpdemux &demux = *(tcpdemux *)user;
-    u_int caplen = h->caplen;
-    u_int length = h->len;
-
-    if (length != caplen) {
-	DEBUG(6) ("warning: only captured %d bytes of %d byte raw frame",
-		  caplen, length);
-    }
-
-    demux.process_ip(&h->ts,p, caplen,flow::NO_VLAN);
-}
-
+#ifdef DLT_LINUX_SLL
 #define SLL_HDR_LEN       16
 
-void dl_linux_sll(u_char *user, const struct pcap_pkthdr *h, const u_char *p){
-    tcpdemux &demux = *(tcpdemux *)user;
+#define SLL_ADDRLEN 8
+
+#ifndef ETHERTYPE_MPLS
+#define ETHERTYPE_MPLS      0x8847
+#endif
+#ifndef ETHERTYPE_MPLS_MULTI
+#define ETHERTYPE_MPLS_MULTI    0x8848
+#endif
+
+void dl_linux_sll(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
+{
     u_int caplen = h->caplen;
     u_int length = h->len;
 
@@ -211,41 +202,74 @@ void dl_linux_sll(u_char *user, const struct pcap_pkthdr *h, const u_char *p){
 	return;
     }
   
-    demux.process_ip(&h->ts,p + SLL_HDR_LEN, caplen - SLL_HDR_LEN,flow::NO_VLAN);
+    struct _sll_header {
+        u_int16_t   sll_pkttype;    /* packet type */
+        u_int16_t   sll_hatype; /* link-layer address type */
+        u_int16_t   sll_halen;  /* link-layer address length */
+        u_int8_t    sll_addr[SLL_ADDRLEN];  /* link-layer address */
+        u_int16_t   sll_protocol;   /* protocol */
+    };
+    
+    _sll_header *sllp = (_sll_header*)p;
+    u_int mpls_sz = 0;
+    if (ntohs(sllp->sll_protocol) == ETHERTYPE_MPLS) {
+        // unwind MPLS stack
+        do {
+            if(caplen < SLL_HDR_LEN + mpls_sz + 4){
+                DEBUG(6) ("warning: MPLS stack overrun");
+                return;
+            }
+            mpls_sz += 4;
+            caplen -= 4;
+        } while ((p[SLL_HDR_LEN + mpls_sz - 2] & 1) == 0 );
+    }
+    
+    struct timeval tv;
+    be13::packet_info pi(DLT_LINUX_SLL,h,p,tvshift(tv,h->ts),p + SLL_HDR_LEN + mpls_sz, caplen - SLL_HDR_LEN);
+    be13::plugin::process_packet_info(pi);
 }
+#endif
 
+#ifndef DLT_IEEE802_11_RADIO
+#define DLT_IEEE802_11_RADIO    127  /* 802.11 plus radiotap radio header */
+#endif
+
+/* List of callbacks for each data link type */
+dlt_handler_t handlers[] = {
+    { dl_null,	   DLT_NULL },
+/* Some systems define DLT_RAW as 12, some as 14, and some as 101.
+ * So it is hard-coded here.
+ */
+    { dl_raw,      12 },
+    { dl_raw,      14 },
+    { dl_raw,     101 },
+    { dl_ethernet, DLT_EN10MB },
+    { dl_ethernet, DLT_IEEE802 },
+    { dl_ppp,      DLT_PPP },
+#ifdef DLT_LINUX_SLL
+    { dl_linux_sll,DLT_LINUX_SLL },
+#endif
+#ifndef WIN32
+    { dl_ieee802_11_radio, DLT_IEEE802_11 },
+    { dl_ieee802_11_radio, DLT_IEEE802_11_RADIO },
+    { dl_prism, DLT_PRISM_HEADER},
+#endif
+    { NULL, 0 }
+};
 
 pcap_handler find_handler(int datalink_type, const char *device)
 {
     int i;
 
-    struct {
-	pcap_handler handler;
-	int type;
-    } handlers[] = {
-	{ dl_null,	DLT_NULL },
-#ifdef DLT_RAW /* older versions of libpcap do not have DLT_RAW */
-	{ dl_raw,	DLT_RAW },
-#endif
-	{ dl_ethernet,	DLT_EN10MB },
-	{ dl_ethernet,	DLT_IEEE802 },
-	{ dl_ppp,	DLT_PPP },
-#ifdef DLT_LINUX_SLL
-	{ dl_linux_sll, DLT_LINUX_SLL },
-#endif
-	{ NULL, 0 },
-    };
-
     DEBUG(3) ("looking for handler for datalink type %d for interface %s",
 	      datalink_type, device);
 
-    for (i = 0; handlers[i].handler != NULL; i++)
-	if (handlers[i].type == datalink_type)
-	    return handlers[i].handler;
+    for (i = 0; handlers[i].handler != NULL; i++){
+	if (handlers[i].type == datalink_type){
+            return handlers[i].handler;
+        }
+    }
 
-    die("sorry - unknown datalink type %d on interface %s", datalink_type,
-	device);
-    /* NOTREACHED */
-    return NULL;
+    die("sorry - unknown datalink type %d on interface %s", datalink_type, device);
+    return NULL;    /* NOTREACHED */
 }
-

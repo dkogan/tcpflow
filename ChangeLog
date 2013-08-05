@@ -1,3 +1,208 @@
+2013-06-11  Basic  <simsong@Mucha.local>
+
+	* doc/tcpflow.1.in (std): removed explaination of filtering expressions
+
+2013-05-26  Basic  <simsong@Mucha.local>
+
+	* src/tcpip.cpp (tcpip::print_packet): implemented hex dump
+
+	* src/scan_netviz.cpp (scan_netviz): disabled by default for now.
+
+	* src/tcpip.cpp (tcpip::print_packet): now prints 'filename' with console output (wasn't working due to bug).
+
+2013-04-17  Simson Garfinkel  <simsong@mncrnpsedu.local>
+
+	* src/iptree.h (template): changed inc() to add()
+2013-04-16  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/iptree.h: changed 'trim' to 'prune' for correct terminology.
+
+2013-03-30  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/scan_tcpdemux.cpp (scan_tcpdemux): added -S tcp_timeout 
+
+2013-03-03  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/scan_netviz.cpp (scan_netviz): scan_netviz enabled by default
+
+2013-02-27  Simson Garfinkel  <simsong@Mucha.local>
+
+	* configure.ac: added /usr/boost/include to search path
+
+2013-01-27  Simson Garfinkel  <simsong@FC17>
+
+	* src/tcpdemux.cpp (close_all_fd): now calls close_file(false), to preven openflows from being modified while it is being iterated.
+
+	* src/tcpflow.h: removed SET_BIT as it wasn't being used
+
+	* configure.ac: removed bcopy & bzero
+
+2013-01-26  Simson Garfinkel  <simsong@npsair.local>
+
+2013-01-08  Simson Garfinkel  <simsong@mncrnpsedu.local>
+
+	* src/scan_netviz.cpp (th_shutdown): th_one_page is now lazily created and destroyed at end
+
+2013-01-03  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpflow.cpp (main): opt_gzip_decompress renamed to gzip_decompress and implemented.
+
+	* src/flow.cpp (flow::new_filename): now automatically makes subdirectories if necessary
+
+2013-01-02  Simson Garfinkel  <simsong@mncrnpsedu.local>
+
+	* src/scan_http.cpp: zero-length attachments are no longer created on disk.
+
+	* src/tcpip.cpp (tcpip::store_packet): zero-length flows are no longer created on disk.
+
+2012-12-27  Simson Garfinkel  <simsong@Mucha.local>
+
+	* renamed stored_flow as saved_flow becuase they are all stored, but only some are saved in the ring bufer.
+
+	* src/tcpdemux.cpp (tcpdemux::close_all): renamed close_all_fd(). close_tcpip renamed close_tcpip_fd; close_oldest renamed close_oldest_fd()
+	(tcpdemux::remove_all_flows): renamed.
+
+2012-12-24  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpip.h (class flow): removed connection_count from flow identifier becuase it cannot be derrived from the flow. We really should have the LSN as part of the flow or something. The connection_count will be found when the filename is made.
+
+2012-12-23  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpdemux.cpp (tcpdemux::process_tcp): option output_enabled changed to store_output
+
+2012-12-22  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/be13_api/sbuf.cpp (sbuf_t::map_file): 
+
+	* src/scan_http.cpp (scan_http_cbo::on_headers_complete): changed retrying_open to open() to eliminate dependency on tcpdemux
+
+	* src/tcpip.h: put in its own file
+
+	* src/util.cpp (mmap): moved fake mmap() cover to util.cpp
+
+	* src/tcpip.cpp (tcpip): no longer closes the file at the end of every tcpip and then re-opens it if there is post-processing. Now it re-uses the same fd.
+	(tcpip): renamed opt_after_header to opt_post_processing
+
+2012-12-18  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpflow.cpp (main): fixed opt_all; it was always true, but it shoudln't be.
+
+2012-12-16  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpdemux.h (class tcpdemux): removed write_to_file
+	(class tcpdemux): removed struct packet_info_t
+	* src/tcpdemux.cpp (tcpdemux::post_process_capture_flow): added delete of sbuf
+
+	* src/scan_http.cpp (scan_http_cbo::on_headers_complete): changed O_APPEND to O_TRUNC
+
+	* src/tcpdemux.cpp: removed process_gzip, since it is now done in scan_http
+
+2012-12-07  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/tcpdemux.h (class flow_addr): fixed operator< type 
+
+2012-11-17  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/tcpflow.cpp (usage): usage now goes to stdout and not stderr.
+
+2012-11-15  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/tcpdemux.h (class tcpdemux): retrying_open now takes a std:;string
+
+2012-11-14  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/tcpip.cpp (tcpip::store_packet): added bytes_processed addition so that <fileobject> <filesize> is properly updated.
+
+	* src/be13_api/bulk_extractor_i.h: renamed histograms to be feature_histograms
+
+	* src/plugin.cpp (process_sbuf): renamed process_extract to process_sbuf and put it here.
+
+2012-11-06  Simson Garfinkel  <simsong@mncrnpsedu.local>
+ 
+ 	* src/tcpdemux.cpp (tcpdemux::process_tcp): first packet sense was inverted. Fixed.
+ 	
+	* src/main.cpp (main): renamed main.cpp to tcpflow.cpp
+
+2012-11-05  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/main.cpp (main): print_usage() renamed usage() for consistency with bulk_extractor
+	(usage): usage made static
+
+2012-10-28  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/pcb_timehistogram.cpp: made histograms static
+
+	* src/tcpip.cpp (tcpip::store_packet): debug_level changed to debug in all files.
+
+2012-10-26  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/flow.cpp (flow::print_usage): shortened filename template usage.
+
+	* src/tcpip.cpp (insert): added this function to insert a space at the beginning of a file. Now tcpflow can handle a flow with missing SYNs and out-of-order packets.
+
+2012-10-25  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/tcpip.cpp (tcpip::print_packet): implemented strip-on-fputc
+
+	* src/tcpdemux.cpp (do_strip_nonprint): removed this function, as it could be replaced with strip-on-fputc
+
+2012-10-24  Simson Garfinkel  <simsong@npsair.local>
+
+	* src/tcpdemux.cpp (tcpdemux::open_tcpfile): now asserts that file is not open
+	(tcpdemux::open_tcpfile): retrying_fopen changed to retrying_open
+	(tcpdemux::process_tcp): completely rewrote the TCP implementation
+	(tcpdemux::process_ip4): 
+
+	The old state machine kept tract of each flow's initial sequence
+	number (ISN) and computed the absolute 32-bit position within the
+	TCP flow for each TCP segment. The problem with this approach is
+	that it would not handle segments larger than 4GiB. The new state
+	machine computes what it expects the Next Sequence Number (NSN) to
+	be based on the previously processed segment in the flow. If there
+	is a difference between the actual NSN and the predicted NSN then
+	there is a relative seek done in the file.  If I file needs to be
+	closed (due to file handle exhaustion) and re-opened (because a
+	segment on the flow shows up), the file pointer is put at the end
+	of the file and the NSN is predicted from the ISN (which was
+	cached). This will allow closing and re-opening flows bigger than
+	4GiB because the bits over 32 bit will be ignored in the NSN
+	calculation.
+
+	* src/tcpdemux.h (class tcpip): store_packet modified to take a delta rather than a sequence number
+	(class tcpip): changed from FILE* to fd for all i/o
+
+	* src/tcpdemux.cpp (tcpdemux::process_tcp): renamed console_only
+	to console_output; modified order of stripping and console_output
+	checking to check first for console output before checking to see if data should be stripped
+
+2012-10-23  Simson Garfinkel  <simsong@mncrnpsedu.local>
+
+	* src/tcpdemux.cpp (tcpdemux::tcpdemux): packet_time renamed packet_counter
+
+	* src/tcpdemux.h (class tcpip): renamed last_packet_time to be last_packet_number as it was not being used
+
+	* src/tcpip.cpp (tcpip::store_packet): removed the 'finished' flag from the tcpip:: class. It was being set when the flow went over demux.max_bytes_per_flow. However, if a packet was then received which was less than max_bytes_per_flow the bytes would not be recorded, because the max had already been passed.
+
+2012-10-21  Simson Garfinkel  <simsong@air2.local>
+
+	* src/tcpip.cpp (tcpip::store_packet): removed syn_set parameter and put in tcpdemux::process_tcp
+
+	* configure.ac: changed version number to 1.3.1devel
+
+2012-10-20  Simson Garfinkel  <simsong@air2.local>
+
+	* src/tcpdemux.h (class tcpdemux): process_tcp, process_ip, process_ip4 and process_ip6 now take const struct timeval &ts instead of const struct timeval *ts as their first argument, becuase ts should never be NULL.
+
+2012-09-16  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/flow.cpp (flow::filename): TM_FORMAT is now "%Y-%m-%dT%H:%M:%SZ"
+
+	* src/xml.cpp (xml::add_DFXML_execution_environment): TM_FORMAT is now always "%Y-%m-%dT%H:%M:%SZ"
+
+2012-09-11  Simson Garfinkel  <simsong@Mucha.local>
+
+	* src/datalink.cpp (dl_ethernet): now handles ETHERTYPE_LOOPBACK not defined.
+
 2012-08-20  Simson Garfinkel  <simsong@FC17>
 
 	* configure.ac: increased version number to 1.3.0

@@ -4,7 +4,7 @@
 # See http://autotoolset.sourceforge.net/tutorial.html 
 # and http://www.openismus.com/documents/linux/automake/automake.shtml 
 
-AC_INIT(TCPFLOW, 1.3.0, bugs@afflib.org)
+AC_INIT(TCPFLOW, 1.4.0, bugs@afflib.org)
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
 AC_CONFIG_FILES([doc/tcpflow.1])
 AC_CONFIG_FILES([tcpflow.spec])
@@ -12,14 +12,19 @@ AC_CONFIG_HEADER([src/config.h])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
+m4_include([src/dfxml/src/dfxml_configure.m4])
+m4_include([src/be13_api/be13_configure.m4])
+
+# Endian check is required for MD5 implementation
+AC_C_BIGENDIAN
+
 AC_CONFIG_MACRO_DIR([m4])
+AC_DEFINE([tcpflow],1,[We are compiling tcpflow])
 
 # Programs we will be using
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
-
-
 
 ################################################################
 ## See if we are running on mingw
@@ -42,12 +47,13 @@ case $host in
      ;;
 
   *-*-mingw32*)   
-     LIBS="-lws2_32 -lgdi32 $LIBS"  # previously had -liberty 
-     CPPFLAGS="-DUNICODE -D_UNICODE -D__MSVCRT_VERSION__=0x0601 -DWINVER=0x0500 -D_WIN32_WINNT=0x0500 -DHAVE_STRUCT_TIMESPEC $CPPFLAGS"
-     CXXFLAGS="$CXXFLAGS -Wno-format "  # compiler mingw-4.3.0 is broken on I64u formats
+     LIBS="-lpsapi -lws2_32 -lgdi32 $LIBS"  
+     CPPFLAGS="-DUNICODE -D_UNICODE -D__MSVCRT_VERSION__=0x0601 -DWINVER=0x0500 -D_WIN32_WINNT=0x0500 -g $CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS --static"
      CFLAGS="$CFLAGS --static -static-libgcc -static-libstdc++"
+     CXXFLAGS="$CXXFLAGS -Wno-format "  # compiler mingw-4.3.0 is broken on I64u formats
      CXXFLAGS="$CXXFLAGS --static -static-libgcc -static-libstdc++"
-     LDFLAGS="$LDFLAGS" # allows exiv2 to throw an exception that's caught elsewhere
+     LDFLAGS="$LDFLAGS --static"
      mingw="yes"
      ;;		 		     
 esac
@@ -55,7 +61,7 @@ esac
 if test x"${mingw}" == "xno" ; then
   # Bring additional directories where things might be found into our
   # search path. I don't know why autoconf doesn't do this by default
-  for spfx in /usr/local /opt/local /sw /usr/local/ssl; do
+  for spfx in /usr/local /opt/local /sw /usr/local/ssl /usr/boost/include ; do
     AC_MSG_NOTICE([checking ${spfx}/include])
     if test -d ${spfx}/include; then
         CPPFLAGS="-I${spfx}/include $CPPFLAGS"
@@ -122,7 +128,7 @@ done
 unset option
 
 
-# Check G++
+# C++
 # We don't use these warnings:
 # -Waggregate-return -- aggregate returns are GOOD; they simplify code design
 # We can use these warnings after ZLIB gets upgraded:
@@ -134,8 +140,13 @@ WARNINGS_TO_TEST="-Wall -MD -D_FORTIFY_SOURCE=2 -Wpointer-arith \
     -Wshadow -Wwrite-strings -Wcast-align  \
     -Wredundant-decls -Wdisabled-optimization \
     -Wfloat-equal -Wmultichar -Wmissing-noreturn \
-    -Wstrict-null-sentinel -Woverloaded-virtual -Wsign-promo \
+    -Woverloaded-virtual -Wsign-promo \
     -funit-at-a-time"
+
+if test x$CXX != "xclang++" ; then
+  # -Wstrict-null-sentinel is not supported under clang
+  WARNINGS_TO_TEST="$WARNINGS_TO_TEST -Wstrict-null-sentinel"
+fi
 
 if test $mingw = "no" ; then
   # add the warnings we don't want to do on mingw
@@ -157,34 +168,33 @@ done
 unset option
 AC_LANG_POP()    
 
-
+#
 # ZLIB is required for decompressing
-#  Not you cannot put comments in the AC_MSG_ERROR for some reason
-AC_CHECK_LIB([z],[uncompress],, AC_MSG_WARN([zlib libraries not installed; try installing zlib-dev zlib-devel zlib1g-dev or libz-dev]))
+#  Note you cannot put comments in the AC_MSG_ERROR for some reason
+AC_CHECK_LIB([z],[uncompress],,
+  AC_MSG_ERROR([zlib libraries not installed; try installing zlib-dev zlib-devel zlib1g-dev or libz-dev]))
 AC_CHECK_HEADERS([zlib.h])
 
 ################################################################
-# DFXML support
-AC_CHECK_HEADERS([sys/cdefs.h sys/resource.h pwd.h sys/utsname.h regex.h])
-AC_CHECK_FUNCS([localtime_r getuid gethostname getwpuid getrusage mkstemp vasprintf regcomp])
+## regex support
+## there are several options
+## tre is better than regex
+AC_CHECK_HEADER([lightgrep/api.h])
+AC_CHECK_LIB([lightgrep], [lg_create_pattern])
+AC_CHECK_HEADERS([regex.h tre/tre.h])
+AC_CHECK_LIB([regex],[regcomp])
+AC_CHECK_LIB([tre],[tre_regcomp])
+AC_CHECK_FUNCS([regcomp tre_regcomp tre_version])
 
-# Determine UTC date offset
-CPPFLAGS="$CPPFLAGS -DUTC_OFFSET=`date +%z`"
 
-# Do we have the CPUID instruction?
-AC_TRY_COMPILE([#define cpuid(id) __asm__( "cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(id), "b"(0), "c"(0), "d"(0))],
-			[unsigned long eax, ebx, ecx, edx;cpuid(0);],
-			have_cpuid=yes,
-			have_cpuid=no)
-if test "$have_cpuid" = yes; then
- AC_DEFINE(HAVE_ASM_CPUID, 1, [define to 1 if __asm__ CPUID is available])
-fi
-
-# Does GCC have the diagnostic pragma?
-AC_TRY_COMPILE([#pragma GCC diagnostic ignored "-Wredundant-decls"],
-    	       [],
-	       AC_DEFINE([GNUC_HAS_DIAGNOSTIC_PRAGMA],[1],[GCC supports #pragma GCC diagnostic]),
-	       )
+################################################################
+## OpenSSL Support (required for AFFLIB and hash_t )
+AC_CHECK_HEADERS([openssl/aes.h openssl/bio.h openssl/evp.h openssl/hmac.h openssl/md5.h openssl/pem.h openssl/rand.h openssl/rsa.h openssl/sha.h openssl/pem.h openssl/x509.h])
+AC_CHECK_LIB([crypto],[EVP_get_digestbyname])	# if crypto is available, get it
+AC_CHECK_LIB([md],[MD5])                        # if libmd is available, get it 
+AC_CHECK_LIB([ssl],[SSL_library_init],,
+     AC_MSG_ERROR([OpenSSL developer library 'libssl-dev' or 'openssl-devel' not installed]))
+AC_CHECK_FUNCS([MD5_Init EVP_get_digestbyname])
 
 ################################################################
 # PTHREAD support
@@ -192,11 +202,11 @@ AC_TRY_COMPILE([#pragma GCC diagnostic ignored "-Wredundant-decls"],
 
 if test  x"$mingw" = x"yes";  then
   #AC_DEFINE([HAVE_STRUCT_TIMESPEC],1,[Required for mingw])
-  #CFLAGS="$CFLAGS -mthreads "
-  #CPPFLAGS="-DPTW32_STATIC_LIB $CPPFLAGS"
-  #CXXFLAGS="$CXXFLAGS -mthreads "
-  #AC_DEFINE(HAVE_PTHREAD,1,[Defined to POSIX threads for mingw])
-  AC_MSG_NOTICE([pthreads now disabled under mingw])
+  CFLAGS="$CFLAGS -mthreads "
+  CPPFLAGS="-DPTW32_STATIC_LIB $CPPFLAGS"
+  CXXFLAGS="$CXXFLAGS -mthreads "
+  AC_DEFINE(HAVE_PTHREAD,1,[Defined to POSIX threads for mingw])
+  #AC_MSG_NOTICE([pthreads now disabled under mingw])
 else
   m4_include([m4/ax_pthread.m4])
   AX_PTHREAD([
@@ -213,6 +223,61 @@ AC_CHECK_HEADERS([pthread.h])
 AC_CHECK_LIB([pthreadGC2],[pthread_create])
 
 ################################################################
+# Boost
+AC_CHECK_HEADERS([boost/version.hpp],,
+  AC_MSG_WARN([tcpflow now requires boost interval_map and interval_set.])
+  if test x"$mingw" = x"yes" ; then 
+    AC_MSG_ERROR([Please install mingw32-boost and mingw64-boost])
+  else
+    AC_MSG_ERROR([Please install boost-devel or libboost-dev.])
+  fi
+)
+
+# Now make sure we have the correct boost version
+AC_LANG_PUSH(C++)
+  have_interval=yes
+  AC_CHECK_HEADERS([boost/icl/interval.hpp boost/icl/interval_map.hpp boost/icl/interval_set.hpp],,have_interval=no)
+  if test "${have_interval}" != yes ; then
+    AC_MSG_ERROR([
+tcpflow requires a version of Boost that has Boost interval_map and interval_set.
+Your version is too old! Please install a current version of Boost from http://www.boost.org/users/download/.
+
+Try these commands:
+  wget http://downloads.sourceforge.net/project/boost/boost/1.53.0/boost_1_53_0.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fboost%2Ffiles%2Fboost%2F1.53.0%2F&ts=1362359340&use_mirror=hivelocity
+  tar xfz boost_1_53_0.tar.gz
+  cd boost_1_53_0
+  sh bootstrap.sh
+  ./b2
+  sudo ./b2 install
+... and then re-run configure!
+])
+  fi
+AC_LANG_POP()    
+
+################################################################
+# drawing support via cairo
+#
+
+# Cairo requires these to be explicitly included on mingw (and perhaps others):
+AC_CHECK_LIB([expat],[XML_ParserCreate])
+AC_CHECK_LIB([pixman-1],[pixman_region_init])
+AC_CHECK_LIB([bz2],[BZ2_bzDecompress])
+AC_CHECK_LIB([freetype],[FT_Init_FreeType]) # requires bz2
+AC_CHECK_LIB([fontconfig],[FcBlanksCreate]) # requires freetype expat
+
+AC_CHECK_HEADERS([cairo/cairo.h cairo/cairo-pdf.h])
+AC_CHECK_HEADERS([cairo.h cairo-pdf.h])
+AC_CHECK_LIB([cairo],[cairo_create], , [
+  AC_MSG_WARN([
+*** cairo libraries not detected.
+*** Please install cairo-devel to get 1-page PDF summary generation.
+])
+  Fmissing_library="cairo-devel $missing_library "
+  Umissing_library="libcairo2-dev $missing_library "
+  Mmissing_library="cairo-devel "
+])
+
+################################################################
 # pcap support. A bit more involved than normal due to the error message
 #
 pcap=test
@@ -222,7 +287,11 @@ AC_ARG_ENABLE([pcap],[  --enable-pcap=false to disable libpcap even if present])
   fi
 
 if test $pcap = test ; then
-  AC_CHECK_LIB(pcap, pcap_lookupdev, , [
+  AC_CHECK_HEADERS(pcap.h pcap/pcap.h )
+  if test x"$mingw" = x"yes" ; then 
+    AC_MSG_WARN([pcap not supported under mingw])
+  else
+    AC_CHECK_LIB(pcap, pcap_lookupdev, , [
 	AC_MSG_WARN([
 Can't find the pcap library (libpcap.a). 
 tcpflow will not live capture or compile rules without pcap!
@@ -238,8 +307,12 @@ pcap-dev library.  Please execute this command:
 
 If your libpcap is installed in a non-standard location, you will need
 to use the --with-pcap=directory to specify where your pcap is
-located.
-  ])])
+located.])
+        Fmissing_library="$Fmissing_library libpcap-dev "
+        Umissing_library="$Umissing_library libpcap-dev "
+        Mmissing_library="$Mmissing_library libpcap "
+    ])
+  fi
 fi
 
 
@@ -249,41 +322,122 @@ fi
 AC_HEADER_STDC
 AC_CHECK_HEADERS([\
 	arpa/inet.h \
+	ctype.h \
 	fcntl.h \
 	inttypes.h \
 	linux/if_ether.h \
-	netinet/if_ether.h \
+	net/ethernet.h \
 	netinet/in.h \
 	netinet/in_systm.h \
-	netinet/ip.h \
 	netinet/tcp.h \
-	pcap.h \
-	pcap/pcap.h \
 	regex.h \
 	semaphore.h \
 	signal.h \
 	string.h \
 	strings.h \
+	stdio.h \
+	stdlib.h \
+	string.h \
+	syslog.h \ 
 	sys/cdefs.h \
 	sys/mman.h \
 	sys/resource.h \
 	sys/socket.h \
 	sys/types.h \
 	sys/bitypes.h \
+	sys/wait.h \
 	unistd.h \
 	])
 
-# This is to get net/if.h to compile
-AC_CHECK_HEADERS([net/if_var.h net/if.h], [], [],
+AC_CHECK_FUNCS([getdtablesize])
+
+#
+# These all require additional headers. See:
+# http://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Present-But-Cannot-Be-Compiled.html
+#
+AC_CHECK_HEADERS([net/if_var.h], [], [],
 [[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+]])
+
+
+
+AC_CHECK_HEADERS([net/if.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 ]])
  
-AC_CHECK_FUNCS([inet_ntop sigaction sigset strnstr setuid setgid mmap futimes futimens bcopy bzero])
+AC_CHECK_HEADERS([netinet/ip_var.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+ 
+AC_CHECK_HEADERS([netinet/ip.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+ 
+AC_CHECK_HEADERS([netinet/ip_ether.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+ 
+
+
+AC_CHECK_HEADERS([netinet/tcpip.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+]])
+ 
+AC_CHECK_FUNCS([inet_ntop sigaction sigset strnstr setuid setgid mmap futimes futimens ])
 AC_CHECK_TYPES([socklen_t], [], [], 
 [[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -300,36 +454,8 @@ AC_CHECK_TYPES([socklen_t], [], [],
 
 AC_CHECK_TYPES([sa_family_t], [], [], 
 [[
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#ifdef HAVE_NETINET_TCP_H
-#include <netinet/tcp.h>
-#endif
-]]
-)
-
-AC_CHECK_TYPES([tcp_seq], [], [], 
-[[
-/* from sysdep.h */
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-
-#ifndef __FAVOR_BSD
-#define __FAVOR_BSD
-#endif
-
-#ifndef __USE_BSD
-#define __USE_BSD
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 
 #ifdef HAVE_ARPA_INET_H
@@ -345,18 +471,74 @@ AC_CHECK_TYPES([tcp_seq], [], [],
 #endif
 ]]
 )
+
+### AC_CHECK_TYPES([tcp_seq], [], [], 
+### [[
+### /* from sysdep.h */
+### #include <stdio.h>
+### #include <stdlib.h>
+### 
+### #ifdef HAVE_UNISTD_H
+### # include <unistd.h>
+### #endif
+### 
+### #ifndef __FAVOR_BSD
+### #define __FAVOR_BSD
+### #endif
+### 
+### #ifndef __USE_BSD
+### #define __USE_BSD
+### #endif
+### 
+### #ifdef HAVE_ARPA_INET_H
+### #include <arpa/inet.h>
+### #endif
+### 
+### #ifdef HAVE_SYS_SOCKET_H
+### #include <sys/socket.h>
+### #endif
+### 
+### #ifdef HAVE_NETINET_TCP_H
+### #include <netinet/tcp.h>
+### #endif
+### ]]
+### )
 
 ############## drop optimization flags if requested ################
-AC_ARG_WITH(noopt, AC_HELP_STRING([--with-noopt], [Drop -O C flags]))
+
+# Should we disable optimization?
+AC_ARG_WITH([opt], AC_HELP_STRING([--without-opt], [Drop all -O C flags]))
+# Or maybe just tone it down a bit?
+AC_ARG_WITH([o3], AC_HELP_STRING([--without-o3], [Do not force O3 optimization; use default level]))
+
 if test x"${AFF_NOOPT}" != "x" ; then
   AC_MSG_NOTICE([Dropping optimization flags because AFF_NOOPT is set.])
-   with_noopt="yes";
+   with_opt="no";
 fi
 
-if test "${with_noopt}" = "yes" ; then
+if test "${with_opt}" = "no" ; then
   AC_MSG_NOTICE([Dropping optimization flags])
   CFLAGS=`echo "$CFLAGS" | sed s/-O[[0-9]]//`             # note the double quoting! 
   CXXFLAGS=`echo "$CXXFLAGS" | sed s/-O[[0-9]]//`
+
+  AC_MSG_NOTICE([Removing -D_FORTIFY_SOURCE=2])
+  CPPFLAGS=`echo $CPPFLAGS | sed s/-D_FORTIFY_SOURCE=2//`
+  CXXFLAGS=`echo $CXXFLAGS | sed s/-D_FORTIFY_SOURCE=2//`
+  CFLAGS=`echo $CFLAGS | sed s/-D_FORTIFY_SOURCE=2//`
+else
+  # and increase optimizer from -O2 to -O3 if not explicitly forbidden
+  if test "${with_o3}" != "no" ; then
+      CFLAGS=`echo   -g "$CFLAGS"   | sed s/-O2/-O3/`             # note the double quoting! 
+      CXXFLAGS=`echo -g "$CXXFLAGS" | sed s/-O2/-O3/`
+  fi
 fi
 
 AC_OUTPUT
+
+if test "x${Fmissing_library}" != "x" ; then
+  AC_MSG_NOTICE([*** You have missing libraries. To install them:])
+  AC_MSG_NOTICE([*** Fedora:  sudo yum install $Fmissing_library])
+  AC_MSG_NOTICE([*** Ubuntu:  sudo apt-get install $Umissing_library])
+  AC_MSG_NOTICE([*** MacOS:   sudo port install $Mmissing_library])
+fi
+

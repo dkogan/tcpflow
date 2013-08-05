@@ -1,5 +1,17 @@
-EXTRA_DIST = test1.sh test1.pcap test2.pcap test3.pcap test4.pcap
-TESTS = test1.sh 
+#
+# About the tests:
+#
+# test1.sh - 
+# test2.sh - 
+# test3.sh - 
+#
+# About the test files:
+#
+
+EXTRA_DIST = test1.sh test1.pcap test2.pcap test3.pcap test4.pcap  \
+	test-pdfs.sh test-multifile.sh
+
+TESTS = test1.sh test-pdfs.sh test-multifile.sh test-iptree.sh
 CLEANFILES = \
 	out/010.000.000.001.09999-010.000.000.002.36559--42 \
 	out/010.000.000.002.36559-010.000.000.001.09999--42 \
@@ -11,7 +23,7 @@ CLEANFILES = \
 	out/2001:6f8:900:7c0::2.00080-2001:6f8:102d::2d0:9ff:fee3:e8de.59201 \
 	out/report.xml 
 
-
 clean:
 	@echo Erase any left over trace files
 	/bin/rm -f *.[0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9].*
+

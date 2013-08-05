@@ -5,43 +5,56 @@
  * This source code is under the GNU Public License (GPL).  See
  * LICENSE for details.
  *
+ * 
+ *
  */
 
-#ifndef __TCPFLOW_H__
-#define __TCPFLOW_H__
+#ifndef TCPFLOW_H
+#define TCPFLOW_H
+
 
 #include "config.h"
 
-/* If we are running on Windows, including the Windows-specific
- * include files first and disable pthread support.
+/* Older versions of autoconf define PACKAGE and VERSION.
+ * Newer versions define PACKAGE_VERSION and PACKAGE_NAME.
+ * We now use the new variables; allow the old ones.
  */
+
+#ifndef PACKAGE_VERSION
+#define PACKAGE_VERSION VERSION
+#endif
+
+#ifndef PACKAGE_NAME
+#define PACKAGE_NAME PACAKGE
+#endif
+
+/****************************************************************
+ *** Windows/mingw compatability seciton.
+ ***
+ *** If we are compiling for Windows, including the Windows-specific
+ *** include files first and disable pthread support.
+ ***/
 #ifdef WIN32
-#  include <winsock2.h>
-#  include <windows.h>
-#  include <windowsx.h>
-#undef HAVE_PTHREAD_H
-#undef HAVE_SEMAPHORE_H
-#undef HAVE_PTHREAD
-#undef HAVE_INET_NTOP		/* it's not there. Really. */
+//#  include <winsock2.h>			// please include winsock2.h before windows.h
+//#  include <windows.h>
+//#  include <windowsx.h>
+#  undef HAVE_PTHREAD_H
+#  undef HAVE_SEMAPHORE_H
+#  undef HAVE_PTHREAD
+#  undef HAVE_INET_NTOP		/* it's not there. Really. */
+#  undef HAVE_EXTERN_PROGNAME	// don't work properly on mingw
+#  define MKDIR(a,b) mkdir(a)    // MKDIR only takes 1 argument on windows
 
+/* Defines not present in Microsoft Windows stack */
 
-#  define MKDIR(a,b) mkdir(a)  // MKDIR only takes 1 argument on windows
 #else
-#  define MKDIR(a,b) mkdir(a,b)		// MKDIR takes 2 arguments on Posix
+/*** Unix-specific elements for windows compatibility section ***/
+#  define MKDIR(a,b) mkdir(a,b) // MKDIR takes 2 arguments on Posix
 #endif
 
-#include <cstdio>         /* required per C++ standard - use the C++ versions*/
-#include <cstdlib>
-#include <cctype>
-#include <cstdarg>
-#include <cerrno>
-
-#include <fcntl.h>
-#include <assert.h>
-
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
+/***
+ *** end of windows compatibility section
+ ****************************************************************/
 
 /* If we are including inttypes.h, mmake sure __STDC_FORMAT_MACROS is defined */
 #ifndef __STDC_FORMAT_MACROS
@@ -57,6 +70,20 @@
 #define __USE_BSD
 #endif
 
+#include <cstdio>         /* required per C++ standard - use the C++ versions*/
+#include <cstdlib>
+#include <cctype>
+#include <cstdarg>
+#include <cerrno>
+#include <iostream>
+
+#include <fcntl.h>
+#include <assert.h>
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 // These are the required include files; they better be present
 #include <inttypes.h>			
 #include <sys/stat.h>
@@ -64,6 +91,7 @@
 #ifdef HAVE_SYS_CDEFS_H
 # include <sys/cdefs.h>
 #endif
+
 
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -76,6 +104,7 @@
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -108,80 +137,50 @@
 # include <net/if.h>
 #endif
 
-#ifdef HAVE_NETINET_TCP_H
-# include <netinet/tcp.h>
-#endif
+/* We have given up on keeping track of this all and are just including our own definitions. */
 
-#ifdef HAVE_NETINET_IN_SYSTM_H
-# include <netinet/in_systm.h>
-#endif
 
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
-#endif
+//#ifdef HAVE_NETINET_IN_SYSTM_H
+//# include <netinet/in_systm.h>
+//#endif
 
-#ifdef HAVE_NETINET_IP_H
-# include <netinet/ip.h>
-#endif
+//#ifdef HAVE_NETINET_IP6_H
+//#include <netinet/ip6.h>		
+//#endif
 
-#ifdef HAVE_NETINET_IP6_H
-#include <netinet/ip6.h>		/*  SLG */
-#endif
+//#ifdef HAVE_NETINET_IP_VAR_H
+//# include <netinet/ip_var.h>		// FREEBSD
+//#endif
 
-#ifdef HAVE_NETINET_IF_ETHER_H
-# include <netinet/if_ether.h>
-#endif
+//#ifdef HAVE_NETINET_IF_ETHER_H
+//# include <netinet/if_ether.h>
+//#endif
 
-#ifdef HAVE_ARPA_INET_H
-# include <arpa/inet.h>
-#endif
+//#ifdef HAVE_NETINET_TCP_H
+//# include <netinet/tcp.h>
+//#endif
 
-/* Linux libc5 systems have different names for certain structures.
- * Patch sent by Johnny Tevessen <j.tevessen@gmx.net>
- */
-#if !defined(HAVE_NETINET_IF_ETHER_H) && defined(HAVE_LINUX_IF_ETHER_H)
-# include <linux/if_ether.h>
-# define ether_header ethhdr
-# define ether_type h_proto
-# define ETHERTYPE_IP ETH_P_IP
-#endif
+//#ifdef HAVE_NETINET_TCPIP_H
+//# include <netinet/tcpip.h>		// FREEBSD
+//#endif
 
-/*
- * Oracle Enterprise Linux is missing the definition for
- * ETHERTYPE_VLAN
- */
-#ifndef ETHERTYPE_VLAN
-# define ETHERTYPE_VLAN 0x8100
-#endif
+//#ifdef HAVE_ARPA_INET_H
+//# include <arpa/inet.h>
+//#endif
+
+
+///*
+// * Oracle Enterprise Linux is missing the definition for
+// * ETHERTYPE_VLAN
+// */
+//#ifndef ETHERTYPE_VLAN
+//# define ETHERTYPE_VLAN 0x8100
+//#endif
 
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
 
-
-/****************************************************************
- *** pcap.h --- If we don't have it, fake it. ---
- ***/
-#if defined(HAVE_LIBPCAP)
-
-/* pcap.h has redundant definitions */
-#  ifdef GNUC_HAS_DIAGNOSTIC_PRAGMA
-#    pragma GCC diagnostic ignored "-Wredundant-decls"
-#  endif
-
-#  ifdef HAVE_PCAP_PCAP_H
-#    include <pcap/pcap.h>
-#  else
-#    include <pcap.h>
-#  endif
-
-#  ifdef GNUC_HAS_DIAGNOSTIC_PRAGMA
-#    pragma GCC diagnostic warning "-Wredundant-decls"
-#  endif
-
-#else
-#  include "pcap_fake.h"
-#endif
 
 /****************** Ugly System Dependencies ******************************/
 
@@ -204,8 +203,6 @@
 # define SEEK_SET 0
 #endif /* SEEK_SET */
 
-#include "xml.h"
-
 /* These may not be defined on some systems */
 
 #ifndef MAX_IPv4_STR_LEN
@@ -214,14 +211,6 @@
 
 #ifndef MAX_IPv6_STR_LEN 
 #define MAX_IPv6_STR_LEN 256
-#endif
-
-#ifndef HAVE_BCOPY
-#define bcopy(src,dst,len) memcpy(dst,src,len)
-#endif
-
-#ifndef HAVE_BZERO
-#define bzero(dst,len)     memset(dst,0,len)
 #endif
 
 #ifndef HAVE_SOCKLEN_T
@@ -236,13 +225,6 @@ typedef size_t socklen_t;
 #define IN6_IS_ADDR_V4COMPAT(x) 0
 #endif
 
-struct private_in6_addr {		// our own private ipv6 definition
-    union {
-	uint8_t   __u6_addr8[16];
-	uint16_t  __u6_addr16[8];
-	uint32_t  __u6_addr32[4];
-    } __u6_addr;                    /* 128-bit IP6 address */
-};
 #undef s6_addr
 #define s6_addr			__u6_addr.__u6_addr8
 
@@ -253,60 +235,96 @@ struct private_in6_addr {		// our own private ipv6 definition
 #define s6_addr32		__u6_addr.__u6_addr32
 
 
-#ifdef _WIN32
-/* For some reason this doesn't work properly with mingw */
-#undef HAVE_EXTERN_PROGNAME
-#endif
-
 /**************************** Constants ***********************************/
 
 #define DEFAULT_DEBUG_LEVEL 1
 #define MAX_FD_GUESS        64
-#define NUM_RESERVED_FDS    5     /* number of FDs to set aside */
 #define SNAPLEN             65536 /* largest possible MTU we'll see */
 
-#include <iostream>
+/* Reserve FDs for stdin, stdout, stderr, and the packet filter; one for breathing
+ * room (we open new files before closing old ones), and one more to
+ * be safe.
+ */
+#define NUM_RESERVED_FDS    6    /* number of FDs to set aside; allows files to be opened as necessary */
 
-#include "tcpdemux.h"
+
+
+#include "be13_api/bulk_extractor_i.h"
   
-/***************************** Macros *************************************/
+/***************************** Main Support *************************************/
 
-#ifndef __MAIN_C__
-extern int debug_level;
-#endif
-
-#define DEBUG(message_level) if (debug_level >= message_level) debug_real
-#define IS_SET(vector, flag) ((vector) & (flag))
-#define SET_BIT(vector, flag) ((vector) |= (flag))
-
-
-/************************* Function prototypes ****************************/
-
-/* datalink.cpp - callback for libpcap */
-pcap_handler find_handler(int datalink_type, const char *device); // callback for pcap
-
-/* flow.cpp - handles the flow database */
-void flow_close_all();
-
-/* main.cpp - CLI */
+/* tcpflow.cpp - CLI */
 extern const char *progname;
-extern int console_only;
-extern int suppress_header;
-extern int strip_nonprint;
-extern int use_color;
-extern u_int min_skip;
-extern bool opt_no_purge;
+void    terminate(int sig) __attribute__ ((__noreturn__));
+#ifndef HAVE_INET_NTOP
+const char *inet_ntop(int af, const void *src,char *dst, socklen_t size);
+#endif
 
 #ifdef HAVE_PTHREAD
 #include <semaphore.h>
 extern sem_t *semlock;
 #endif
 
-/* util.c - utility functions */
-void init_debug(char *argv[]);
+#ifndef __MAIN_C__
+extern int debug;
+#endif
+
+#define DEBUG(message_level) if (debug >= message_level) debug_real
+
+/************************* per-file globals  ****************************/
+
+/* datalink.cpp - callback for libpcap */
+extern int32_t datalink_tdelta;                                   // time delta to add to each packet
+pcap_handler find_handler(int datalink_type, const char *device); // callback for pcap
+typedef struct {
+    pcap_handler handler;
+    int type;
+} dlt_handler_t;
+
+void dl_ieee802_11_radio(u_char *user, const struct pcap_pkthdr *h, const u_char *p);
+void dl_prism(u_char *user, const struct pcap_pkthdr *h, const u_char *p);
+
+/**
+ * shift the time value, in line with what the user requested...
+ * previously this returned a structure on the stack, but that
+ * created an optimization problem with gcc 4.7.2
+ */
+inline const timeval &tvshift(struct timeval &tv,const struct timeval &tv_)
+{
+    tv.tv_sec  = tv_.tv_sec + datalink_tdelta;
+    tv.tv_usec = tv_.tv_usec;
+    return tv;
+}
+
+
+
+/* util.cpp - utility functions */
+extern int debug;
+std::string ssprintf(const char *fmt,...);
+std::string comma_number_string(int64_t input);
+void mkdirs_for_path(std::string path); // creates any directories necessary for the path
+std::string macaddr(const uint8_t *addr);
+
+#define DEBUG_PEDANTIC    0x0001       // check values more rigorously
+void init_debug(const char *progname,int include_pid);
 void (*portable_signal(int signo, void (*func)(int)))(int);
 void debug_real(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 void die(const char *fmt, ...) __attribute__ ((__noreturn__))  __attribute__ ((format (printf, 1, 2)));
+
+/* scanners */
+
+extern "C" scanner_t scan_md5;
+extern "C" scanner_t scan_http;
+extern "C" scanner_t scan_tcpdemux;
+extern "C" scanner_t scan_netviz;
+
+/* extra << functions */
+inline std::ostream & operator <<(std::ostream &os,const struct timeval &tv)
+{
+    os << "sec: " << tv.tv_sec << " usec: " << tv.tv_usec;
+    return os;
+}
+
 
 
 #endif /* __TCPFLOW_H__ */

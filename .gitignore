@@ -70,12 +70,15 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 missing
 stamp-h*
+# plus vim backups
+*.swp
 
 depcomp
 
 # Executables
 .deps
 .libs
+tags
 TAGS
 src/tcpflow
 doc/tcpflow.1
@@ -86,3 +89,11 @@ out
 src/a.out
 tests/out
 tests/packet1.pcap
+config.h.in
+src/iphtest-nitroba-100.txt
+src/iphtest-nitroba-1000.txt
+src/iphtest-nitroba-10000.txt
+test-driver
+tests/*.pdf
+*.trs
+.dirstamp

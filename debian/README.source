@@ -1,0 +1,8 @@
+This is the tcpflow 1.4.0 source. The upstream repo used 3 submodules. The
+tarballs github gives you do NOT contain submodules, so I repacked the source to
+include these. Note that one of the submodules (http-parser) exists in Debian as
+a package, however I still use the submodule because of
+
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=719780
+
+ -- Dima Kogan <dima@secretsauce.net>, Thu,  5 Sep 2013 17:19:57 -0700

@@ -1,0 +1,21 @@
+From: Dima Kogan <dima@secretsauce.net>
+Date: Thu, 5 Sep 2013 20:44:46 -0700
+Subject: removed unit test that is missing its .pcap file
+
+---
+ tests/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 282ddf0..9838ff8 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -11,7 +11,7 @@
+ EXTRA_DIST = test1.sh test1.pcap test2.pcap test3.pcap test4.pcap  \
+ 	test-pdfs.sh test-multifile.sh
+ 
+-TESTS = test1.sh test-pdfs.sh test-multifile.sh test-iptree.sh
++TESTS = test1.sh test-pdfs.sh test-multifile.sh
+ CLEANFILES = \
+ 	out/010.000.000.001.09999-010.000.000.002.36559--42 \
+ 	out/010.000.000.002.36559-010.000.000.001.09999--42 \

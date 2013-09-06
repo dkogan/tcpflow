@@ -8,7 +8,10 @@ Build-Depends: debhelper (>= 9),
                zlib1g,
                dh-autoreconf,
 # openssl dependency is for the test suite
-               openssl
+               openssl,
+               libssl-dev,
+               libboost-dev,
+               libcairo2-dev
 Homepage: https://github.com/simsong/tcpflow
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/tcpflow.git
 Vcs-Git: git://anonscm.debian.org/collab-maint/tcpflow.git

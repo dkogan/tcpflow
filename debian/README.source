@@ -5,4 +5,18 @@ a package, however I still use the submodule because of
 
   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=719780
 
- -- Dima Kogan <dima@secretsauce.net>, Thu,  5 Sep 2013 17:19:57 -0700
+So in summary, this tarball contains
+
+- The full source of the 1.4.0 release of tcpflow
+- The full source of the dfxml submodule at that release
+- The full source of the be13_api submodule at that release
+- The full source of the http-parser submodule at that release
+
+The dfxlm source had 3 dangling symlinks that were removed to pacify lintian.
+These are
+
+- INSTALL
+- COPYING
+- depcomp
+
+ -- Dima Kogan <dima@secretsauce.net>, Sun, 15 Sep 2013 02:17:02 -0700

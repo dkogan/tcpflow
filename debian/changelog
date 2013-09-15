@@ -1,3 +1,9 @@
+tcpflow (1.4.0+repack1-1) unstable; urgency=low
+
+  * Bumped the major version to indicate that the sources were repacked
+
+ -- Dima Kogan <dima@secretsauce.net>  Sun, 15 Sep 2013 02:18:32 -0700
+
 tcpflow (1.4.0-1) unstable; urgency=low
 
   * Upstream update

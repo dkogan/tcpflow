@@ -1,2 +1,4 @@
 0001-debian-build-works-from-the-tarball-so-doesn-t-touch.patch
 0002-removed-unit-test-that-is-missing-its-.pcap-file.patch
+0006-fixes-CPUID-used-on-non-x86-architectures.patch
+0007-moved-to-outside-ifdef.patch

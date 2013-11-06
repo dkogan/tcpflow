@@ -1,6 +1,7 @@
 tcpflow (1.4.0+repack1-2) unstable; urgency=low
 
   * imported upstream patches to let non-x86 builds work (Closes: #725630)
+  * patched the source to build on kfreebsd (Closes: #725660)
   * debian/watch version mangling now handles the +repack source
 
  -- Dima Kogan <dima@secretsauce.net>  Tue, 05 Nov 2013 12:03:56 -0800

@@ -2,3 +2,4 @@
 0002-removed-unit-test-that-is-missing-its-.pcap-file.patch
 0006-fixes-CPUID-used-on-non-x86-architectures.patch
 0007-moved-to-outside-ifdef.patch
+0009-Setting-ETHERTYPE_IPV6-and-ETHERTYPE_VLAN-explicitly.patch

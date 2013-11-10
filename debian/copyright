@@ -122,7 +122,8 @@ License: GPL-2+
 
 Files: src/netviz/*
 Copyright: 2012-2013 Michael Shick <mfshick@nps.edu>
-License: Public Domain
+License: public-domain
+ This source file is public domain, as it is not based on the original tcpflow
 
 Files: src/hold/tcp_options.cpp
 Copyright: 2006-2007 Doug Madory
@@ -269,8 +270,8 @@ License: LGPL-2.1+
 
 Files: src/be13_api/* src/dfxml/*
 Copyright: 2013 Simson Garfinkel <simsong@acm.org>
-License: Public domain
-Comment: Confirmed by email to the author
+License: public-domain
+ Confirmed by email to the author
 
 Files: src/http-parser/*
 Copyright: Igor Sysoev

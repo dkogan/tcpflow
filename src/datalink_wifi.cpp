@@ -4,9 +4,6 @@
  * it maintains some 802.11 specific databases.
  */ 
 
-
-#ifndef WIN32
-
 #include "tcpflow.h"
 #include "wifipcap.h"
 #include <algorithm>
@@ -16,10 +13,10 @@
 bool opt_enforce_80211_frame_checksum = true; // by default, only give good checksums
 
 /**
- * TFWC --- TCPFLOW callbacks for wifippcap
+ * TFCB --- TCPFLOW callbacks for wifippcap
  */
 
-class TFWC : public WifipcapCallbacks {
+class TFCB : public WifipcapCallbacks {
 private:
     bool fcs_ok;                        // framechecksum is okay!
     typedef pair<const WifipcapCallbacks::MAC *,const char *> mac_ssid_pair;
@@ -34,10 +31,11 @@ private:
     mac_ssids_seen_t mac_ssids_seen;
 
 public:
-    TFWC():fcs_ok(),mac_ssids_seen(){};
+    TFCB():fcs_ok(),mac_ssids_seen(){};
 
+#define DEBUG_WIFI
 #ifdef DEBUG_WIFI
-    void PacketBegin(const struct timeval& t, const u_char *pkt, int len, int origlen) {
+    void PacketBegin(const struct timeval& t, const u_char *pkt, u_int len, int origlen) {
 	cout << t << " {" << endl;
     }
     void PacketEnd() {
@@ -47,18 +45,18 @@ public:
  
     bool Check80211FCS() { return opt_enforce_80211_frame_checksum; } // check the frame checksums
     void Handle80211(const struct timeval& t, u_int16_t fc, const MAC& sa, const MAC& da, const MAC& ra, const MAC& ta,
-                     const u_char *ptr, int len, bool flag) {
+                     const u_char *ptr, u_int len, bool flag) {
 	this->fcs_ok = flag;
     }
 
-    void HandleLLC(const struct timeval& t, const struct llc_hdr_t *hdr, const u_char *rest, int len) {
+    void HandleLLC(const struct timeval& t, const struct llc_hdr_t *hdr, const u_char *rest, u_int len) {
         if (opt_enforce_80211_frame_checksum && !fcs_ok) return;
 #ifdef DEBUG_WIFI
         cout << "  " << "802.11 LLC :\t" << "len=" << len << endl;
 #endif
     }
 
-    void Handle80211DataFromAP(const struct timeval& t, const data_hdr_t *hdr, const u_char *rest, int len) {
+    void Handle80211DataFromAP(const struct timeval& t, const data_hdr_t *hdr, const u_char *rest, u_int len) {
         if (opt_enforce_80211_frame_checksum && !fcs_ok) return;
 #ifdef DEBUG_WIFI
         cout << hdr->sa;
@@ -69,8 +67,6 @@ public:
         /* TK1: Does the pcap header make sense? */
         /* TK2: How do we get and preserve the the three MAC addresses? */
 
-        printf("DATA_HDRLEN=%d  DATA_WDS_HDRLEN=%d\n",DATA_HDRLEN,DATA_WDS_HDRLEN);
-
         sbuf_t sb(pos0_t(),rest,len,len,0);
         sb.hex_dump(std::cout);
 
@@ -79,9 +75,9 @@ public:
 
         be13::packet_info pi(DLT_IEEE802_11,(const pcap_pkthdr *)0,(const u_char *)0,tvshift(tv,t),rest,len);
         printf("pi.ip_version=%d\n",pi.ip_version());
-        be13::plugin::process_packet_info(pi);
+        be13::plugin::process_packet(pi);
     }
-    void Handle80211DataToAP(const struct timeval& t, const data_hdr_t *hdr, const u_char *rest, int len) {
+    void Handle80211DataToAP(const struct timeval& t, const data_hdr_t *hdr, const u_char *rest, u_int len) {
         if (opt_enforce_80211_frame_checksum && !fcs_ok) return;
 #ifdef DEBUG_WIFI
         cout << "  " << "802.11 data to AP:\t" 
@@ -91,7 +87,7 @@ public:
         /* TK1: Does the pcap header make sense? */
         /* TK2: How do we get and preserve the the three MAC addresses? */
         be13::packet_info pi(DLT_IEEE802_11,(const pcap_pkthdr *)0,(const u_char *)0,tvshift(tv,t),rest,len);
-        be13::plugin::process_packet_info(pi);
+        be13::plugin::process_packet(pi);
     }
 
     /* This implementation only cares about beacons, so that's all we record */
@@ -119,27 +115,18 @@ public:
 };
 
 /* Entrance point */
-static Wifipcap *wcap = 0;
-static Wifipcap::PcapUserData data;
+static Wifipcap wcap;
+static TFCB tfcb;
 void dl_ieee802_11_radio(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 {
-    if(wcap==0){
-        wcap = new Wifipcap();
-        data.wcap = wcap;
-        data.cbs  = new TFWC();
-    }
+    Wifipcap::PcapUserData data(&wcap,&tfcb,DLT_IEEE802_11_RADIO);
     Wifipcap::dl_ieee802_11_radio(reinterpret_cast<u_char *>(&data),h,p);
 }    
 
 void dl_prism(u_char *user, const struct pcap_pkthdr *h, const u_char *p)
 {
-    if(wcap==0){
-        wcap = new Wifipcap();
-        data.wcap = wcap;
-        data.cbs  = new TFWC();
-    }
+    Wifipcap::PcapUserData data(&wcap,&tfcb,DLT_PRISM_HEADER);
     Wifipcap::dl_prism(reinterpret_cast<u_char *>(&data),h,p);
 }    
 
         
-#endif

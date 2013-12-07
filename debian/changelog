@@ -1,3 +1,76 @@
+tcpflow (1.4.3+repack1-1~2.gbpb52d75) UNRELEASED; urgency=low
+
+  ** SNAPSHOT build @b52d7565038439bbed7a02f28e66d8af05e146b9 **
+
+  [ Simson Garfinkel ]
+  * Updated Readme
+
+  [ Will Glynn ]
+  * Add GPL3 license header to mime_map.{cpp,h}
+
+  [ Simson L. Garfinkel ]
+  * added pull
+  * ignores (noisly) funny SYNs
+  * now compiles on C11
+
+  [ Michael Shick ]
+  * add -std=c++11 to CXXFLAGS if applicable
+
+  [ Simson Garfinkel ]
+  * added AM_PROG_CC_C_O
+  * added C11 cleanup
+
+  [ Michael Shick ]
+  * bootstrapping cleanup
+  * Pin be13_api with g++ 4.7.2 warning cleanup
+
+  [ Dima Kogan ]
+  * slightly improved debian/watch regex
+
+  [ Simson Garfinkel ]
+  * updated local issues
+  * updated to new versions
+  * added error for wifi snffing
+  * wifipcap is worth of working now
+  * cleaned up wifipcap
+  * updated wifipcap to remove duplicate code
+  * initial wifi implementaiton operational
+  * updated for MacOS 10.8
+  * updated for 1.4.2
+  * fixed configure.ac script to cover spaces in CXX per Ryan Schmidt <notifications@github.com>
+  * now counts mgmt beacons
+  * fixed for regex change on mavericks
+  * some additional reworkign
+  * now properly handles radiocap
+  * allows transcripts with and without checksum
+  * updated for wifi
+  * fixed pull
+  * changes to list
+  * added copyright info
+  * moved to master
+  * fixed comment
+  * whoops --- you cannot have a vector of references
+  * updated to new version
+  * fixed typo; added support for tcpflow
+  * fixed bugs
+  * added sqlite test  program
+
+  [ Dima Kogan ]
+  * imported patches. boring build stuff
+
+  [ Simson Garfinkel ]
+  * cleaned up compiling; removed use namespace std; removed pcap files
+  * removed a target
+
+  [ Dima Kogan ]
+  * imported patches to this new release
+  * imported patches to this new release
+  * snapshot changelog bump
+  * added libhttp-parser-dev as a build-dep
+  * updated README.source to describe the new situation
+
+ -- Simson Garfinkel <simsong@acm.org>  Fri, 06 Dec 2013 20:12:59 -0800
+
 tcpflow (1.4.0+repack1-2) unstable; urgency=low
 
   * imported upstream patches to let non-x86 builds work (Closes: #725630)

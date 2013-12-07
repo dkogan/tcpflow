@@ -9,8 +9,9 @@
 
 #define __MAIN_C__
 
-#include "tcpflow.h"
+#include "config.h"
 
+#include "tcpflow.h"
 
 #include "tcpip.h"
 #include "tcpdemux.h"
@@ -23,6 +24,7 @@
 #include <vector>
 #include <sys/types.h>
 #include <dirent.h>
+
 
 
 
@@ -70,6 +72,7 @@ scanner_t *scanners_builtin[] = {
     scan_http,
     scan_netviz,
     scan_tcpdemux,
+    scan_wifiviz,
     0};
 
 bool opt_no_promisc = false;		// true if we should not use promiscious mode
@@ -172,8 +175,6 @@ static void dfxml_create(class dfxml_writer &xreport,const std::string &command_
     xreport.xmlout("dc:type","Feature Extraction","",false);
     xreport.pop();
     xreport.add_DFXML_creator(PACKAGE_NAME,PACKAGE_VERSION,"",command_line);
-    xreport.push("configuration");
-    xreport.pop();			// configuration
 }
 
 
@@ -210,13 +211,15 @@ void terminate(int sig)
 #ifdef HAVE_FORK
 // transparent decompression for process_infile
 class inflater {
+    const std::string suffix;
+    const std::string invoc_format;
 public:
-    inflater(regex_t regex_, std::string invoc_format_) :
-        regex(regex_), invoc_format(invoc_format_) {}
+    inflater(const std::string &suffix_, const std::string &invoc_format_) :
+        suffix(suffix_), invoc_format(invoc_format_) {}
     // is this inflater appropriate for a given file?
     bool appropriate(const std::string &file_path) const
     {
-        return regexec(&regex, file_path.c_str(), (size_t) 0, NULL, 0) == 0;
+        return ends_with(file_path,suffix);
     }
     // invoke the inflater in a shell, and return the file descriptor to read the inflated file from
     int invoke(const std::string &file_path) const
@@ -251,30 +254,22 @@ public:
         close(pipe_fds[1]);
         return pipe_fds[0];
     }
-    regex_t regex;
-    std::string invoc_format;
 };
 
 static std::vector<inflater> build_inflaters()
 {
     std::vector<inflater> output;
-    regex_t re;
 
     // gzip
-    regcomp(&re, "\\.gz$", REG_EXTENDED);
-    output.push_back(inflater(re, "gunzip -c '%s'"));
+    output.push_back(inflater(".gz", "gunzip -c '%s'"));
     // zip
-    regcomp(&re, "\\.zip$", REG_EXTENDED);
-    output.push_back(inflater(re, "unzip -p '%s'"));
+    output.push_back(inflater(".zip", "unzip -p '%s'"));
     // bz2
-    regcomp(&re, "\\.bz2$", REG_EXTENDED);
-    output.push_back(inflater(re, "bunzip2 -c '%s'"));
+    output.push_back(inflater(".bz2", "bunzip2 -c '%s'"));
     // xz
-    regcomp(&re, "\\.xz$", REG_EXTENDED);
-    output.push_back(inflater(re, "unxz -c '%s'"));
+    output.push_back(inflater(".xz", "unxz -c '%s'"));
     // lzma
-    regcomp(&re, "\\.lzma$", REG_EXTENDED);
-    output.push_back(inflater(re, "unlzma -c '%s'"));
+    output.push_back(inflater(".lzma", "unlzma -c '%s'"));
 
     return output;
 }
@@ -381,6 +376,7 @@ int main(int argc, char *argv[])
 {
     bool didhelp = false;
     feature_recorder::set_main_threadid();
+    sbuf_t::set_map_file_delimiter(""); // no delimiter on carving
 #ifdef BROKEN
     std::cerr << "WARNING: YOU ARE USING AN EXPERIMENTAL VERSION OF TCPFLOW \n";
     std::cerr << "THAT DOES NOT WORK PROPERLY. PLEASE USE A RELEASE DOWNLOADED\n";
@@ -644,9 +640,6 @@ int main(int argc, char *argv[])
     si.get_config("debug-prefix",&debug_prefix,"Prefix for debug output");
     init_debug(debug_prefix.c_str(),0);
 
-    argc -= optind;
-    argv += optind;
-
     DEBUG(10) ("%s version %s ", PACKAGE_NAME, PACKAGE_VERSION);
 
     feature_file_names_t feature_file_names;
@@ -659,9 +652,19 @@ int main(int argc, char *argv[])
 
     si.get_config("tdelta",&datalink_tdelta,"Time offset for packets");
 
-    if(demux.xreport) demux.xreport->xmlout("tdelta",datalink_tdelta);
+    /* Record the configuration */
+    if(xreport){
+        xreport->push("configuration");
+        xreport->pop();			// configuration
+        xreport->xmlout("tdelta",datalink_tdelta);
+    }
+
+
 
     /* Process r files and R files */
+    if(xreport){
+        xreport->push("configuration");
+    }
     if(rfiles.size()==0 && Rfiles.size()==0){
 	/* live capture */
 #if defined(HAVE_SETUID) && defined(HAVE_GETUID)
@@ -694,9 +697,13 @@ int main(int argc, char *argv[])
     DEBUG(2)("Flow map size at end of processing: %d",(int)demux.flow_map.size());
     DEBUG(2)("Flows seen:                         %d",(int)demux.flow_counter);
 
+    int open_fds = (int)demux.open_flows.size();
+    int flow_map_size = (int)demux.flow_map.size();
+
     demux.close_all_fd();
-    be13::plugin::phase_shutdown(fs);
-    
+    std::stringstream ss;
+    be13::plugin::phase_shutdown(fs,xreport ? &ss : 0);
+
     /*
      * Note: funny formats below are a result of mingw problems with PRId64.
      */
@@ -707,7 +714,15 @@ int main(int argc, char *argv[])
     DEBUG(2)(total_packets_processed.c_str(),demux.packet_counter);
 
     if(xreport){
+
 	demux.remove_all_flows();	// empty the map to capture the state
+        xreport->pop();                 // fileobjects
+        xreport->xmlout("summary",ss.str(),"",false);
+        xreport->xmlout("open_fds_at_end",open_fds);
+        xreport->xmlout("max_open_flows",demux.max_open_flows);
+        xreport->xmlout("total_flows",demux.flow_counter);
+        xreport->xmlout("flow_map_size",flow_map_size);
+        xreport->xmlout("total_packets",demux.packet_counter);
 	xreport->add_rusage();
 	xreport->pop();                 // bulk_extractor
 	xreport->close();
@@ -735,7 +750,8 @@ int main(int argc, char *argv[])
                 closedir(dirp);
             }
             if(filecount>=10000){
-                std::cerr << "*** tcpflow created " << filecount << " files in output directory " << demux.outdir << "\n";
+                std::cerr << "*** tcpflow created " << filecount
+                          << " files in output directory " << demux.outdir << "\n";
                 std::cerr << "***\n";
                 std::cerr << "*** Next time, specify command-line options: -Fk , -Fm , or -Fg \n";
                 std::cerr << "*** This will automatically bin output into subdirectories.\n";

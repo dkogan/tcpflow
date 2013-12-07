@@ -19,18 +19,68 @@
 #include <sstream>
 #include <vector>
 
-
-
 /* static */ uint32_t tcpdemux::max_saved_flows = 100;
 /* static */ uint32_t tcpdemux::tcp_timeout = 0;
 
-tcpdemux::tcpdemux():outdir("."),flow_counter(0),packet_counter(0),
-		     xreport(0),pwriter(0),max_open_flows(),max_fds(get_max_fds()-NUM_RESERVED_FDS),
-                     flow_map(),open_flows(),saved_flow_map(),
-		     saved_flows(),start_new_connections(false),opt(),fs()
-		     
+tcpdemux::tcpdemux():
+#ifdef HAVE_SQLITE3
+    db(),insert_flow(),
+#endif
+    outdir("."),flow_counter(0),packet_counter(0),
+    xreport(0),pwriter(0),max_open_flows(),max_fds(get_max_fds()-NUM_RESERVED_FDS),
+    flow_map(),open_flows(),saved_flow_map(),
+    saved_flows(),start_new_connections(false),opt(),fs()
 {
 }
+
+void tcpdemux::openDB()
+{
+#ifdef HAVE_SQLITE3
+    int rc = sqlite3_open("test.db", &db);
+    if( rc ){
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        db = 0;
+    }
+    /* Create SQL statement */
+    const char *sql = "CREATE TABLE connections ("
+        "starttime TEXT NOT NULL,"
+        "endtime TEXT NOT NULL,"
+        "src_ipn TEXT,"  
+        "dst_ipn TEXT,"
+        "mac_daddr TEXT,"
+        "mac_saddr TEXT,"
+        "packets INTEGER,"
+        "srcport INTEGER,"
+        "dstport INTEGER,"
+        "hashdigest_md5 TEXT);";
+
+    /* Execute SQL statement */
+    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+        sqlite3_close(db);
+        return 0;
+    }
+    const char* zSql = "INSERT INTO connections (starttime,endtime,src_ipn,dst_ipn,mac_daddr,mac_saddr,packets,srcport,dstport,hashdigest_md5) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    if(sqlite3_prepare_v2(db, zSql, strlen(zSql), &insert_stmt, NULL)!=SQLITE_OK ){
+        fprintf(stderr, "SQL prepare error");
+        db = 0;
+        insert_stmt=0;
+        return(0);
+    }
+#endif
+}
+
+void  tcpdemux::write_flow_record(const std::string &starttime,const std::string &endtime,
+                        const std::string &src_ipn,const std::string &dst_ipn,
+                        const std::string &mac_daddr,const std::string &mac_saddr,
+                        uint64_t packets,uint16_t srcport,uint16_t dstport,
+                        const std::string &hashdigest_md5)
+{
+}
+
+
 
 /* static */ tcpdemux *tcpdemux::getInstance()
 {
@@ -134,9 +184,15 @@ tcpip *tcpdemux::create_tcpip(const flow_addr &flowa, be13::tcp_seq isn,const be
 }
 
 /**
- * remove a flow from the database and close the flow
- * These are the only places where a tcpip object is deleted so there is no chance of finding it again.
- * This typically happens at the end of the run unless items in the map were removed.
+ * Remove a flow from the database.
+ * Close the flow file.
+ * Write to the report.xml object.
+ * Save in the sqlite database.
+ * This is the ONLY place where a tcpip object is deleted so there is no chance of finding it again.
+ * 
+ * Flows are post-processed when a FIN is received and all bytes are received.
+ * If a FIN is received and bytes are outstanding, they are post-processed when the last byte is received.
+ * When the program shut down, all open flows are post-processed.
  */
 
 void tcpdemux::post_process(tcpip *tcp)
@@ -627,17 +683,19 @@ int tcpdemux::process_pkt(const be13::packet_info &pi)
 
     /* Process the timeout, if there is any */
     if(tcp_timeout){
-        std::vector<flow *> to_close;
+        /* Get a list of the flows that need to be closed.  */
+        std::vector<flow_addr *> to_close;
         for(flow_map_t::iterator it = flow_map.begin(); it!=flow_map.end(); it++){
             tcpip &tcp = *(it->second);
-            flow &f = tcp.myflow;
-            uint32_t age = pi.ts.tv_sec - f.tlast.tv_sec;
+            uint32_t age = pi.ts.tv_sec - tcp.myflow.tlast.tv_sec;
             if (age > tcp_timeout){
-                to_close.push_back(&f);
+                to_close.push_back(&tcp.myflow);
             }
         }
-
-        for(std::vector<flow *>::iterator it = to_close.begin(); it!=to_close.end(); it++){
+        /* Close them. This removes the flows from the flow_map(), which is why we need
+         * to create the list first.
+         */
+        for(std::vector<flow_addr *>::iterator it = to_close.begin(); it!=to_close.end(); it++){
             remove_flow(*(*it));
         }
     }

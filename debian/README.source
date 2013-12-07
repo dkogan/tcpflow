@@ -1,22 +1,12 @@
-This is the tcpflow 1.4.0 source. The upstream repo used 3 submodules. The
-tarballs github gives you do NOT contain submodules, so I repacked the source to
-include these. Note that one of the submodules (http-parser) exists in Debian as
-a package, however I still use the submodule because of
-
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=719780
+This is the tcpflow source. The upstream repo uses 3 submodules. The tarballs
+github gives you do NOT contain submodules, so I'm repacking the source to
+include these. One of the submodules (http-parser) exists in Debian as a
+separate package, so I'm using that, and repacking the 2 other submodules.
 
 So in summary, this tarball contains
 
-- The full source of the 1.4.0 release of tcpflow
-- The full source of the dfxml submodule at that release
-- The full source of the be13_api submodule at that release
-- The full source of the http-parser submodule at that release
+- The full source of tcpflow
+- The full source of the dfxml submodule
+- The full source of the be13_api submodule
 
-The dfxlm source had 3 dangling symlinks that were removed to pacify lintian.
-These are
-
-- INSTALL
-- COPYING
-- depcomp
-
- -- Dima Kogan <dima@secretsauce.net>, Sun, 15 Sep 2013 02:17:02 -0700
+ -- Dima Kogan <dima@secretsauce.net>, Fri,  6 Dec 2013 22:56:40 -0800

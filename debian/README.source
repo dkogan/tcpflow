@@ -9,4 +9,14 @@ So in summary, this tarball contains
 - The full source of the dfxml submodule
 - The full source of the be13_api submodule
 
- -- Dima Kogan <dima@secretsauce.net>, Fri,  6 Dec 2013 22:56:40 -0800
+The source tarball was made with something like this:
+
+ $ git clone https://github.com/simsong/tcpflow.git
+ $ cd tcpflow
+ $ git reset --hard tcpflow-1.4.4 
+ $ git submodule init
+ $ git submodule update
+ $ cd ..
+ $ tar cz --exclude '*/.git' --exclude '*/src/http-parser/*' tcpflow > tcpflow_1.4.4+repack1.orig.tar.gz
+
+ -- Dima Kogan <dima@secretsauce.net>, Sun,  5 Jan 2014 01:48:49 -0800

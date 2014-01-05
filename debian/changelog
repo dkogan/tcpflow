@@ -1,3 +1,9 @@
+tcpflow (1.4.4+repack1-1) unstable; urgency=low
+
+  * Upstream update to 1.4.4
+
+ -- Dima Kogan <dima@secretsauce.net>  Sun, 05 Jan 2014 01:54:19 -0800
+
 tcpflow (1.4.3+repack1-1) unstable; urgency=low
 
   * Upstream update to 1.4.3 (Closes: #729328)

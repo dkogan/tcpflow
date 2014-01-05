@@ -8,10 +8,10 @@ Subject: using the debian package of libhttp-parser instead of this one
  2 files changed, 3 insertions(+), 9 deletions(-)
 
 diff --git a/src/Makefile.am b/src/Makefile.am
-index c0d7eaf..071177a 100644
+index 67a6fa4..a80fc09 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -74,18 +74,12 @@ tcpflow_SOURCES = \
+@@ -75,18 +75,12 @@ tcpflow_SOURCES = \
  	scan_wifiviz.cpp \
  	pcap_writer.h \
  	iptree.h \

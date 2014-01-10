@@ -3,6 +3,14 @@ github gives you do NOT contain submodules, so I'm repacking the source to
 include these. One of the submodules (http-parser) exists in Debian as a
 separate package, so I'm using that, and repacking the 2 other submodules.
 
+Additionally, the dfxml submodule in the tcpflow 1.4.4 source had some erroneous
+out-of-tree symlinks. This was fixed by a later patch:
+
+ https://github.com/simsong/dfxml/commit/4d54ca2db2eb06a4a3074111be5b784568d86bcb
+
+This patch converts symlinks into actual files, which is something dpkg-source
+doesn't support. Thus this patch is included in the repacked source also
+
 So in summary, this tarball contains
 
 - The full source of tcpflow
@@ -19,4 +27,4 @@ The source tarball was made with something like this:
  $ cd ..
  $ tar cz --exclude '*/.git' --exclude '*/src/http-parser/*' tcpflow > tcpflow_1.4.4+repack1.orig.tar.gz
 
- -- Dima Kogan <dima@secretsauce.net>, Sun,  5 Jan 2014 01:48:49 -0800
+ -- Dima Kogan <dima@secretsauce.net>, Thu,  9 Jan 2014 21:32:38 -0800

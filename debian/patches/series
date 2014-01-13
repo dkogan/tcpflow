@@ -1,1 +1,2 @@
 0001-using-the-debian-package-of-libhttp-parser-instead-o.patch
+packing-struct-tcphdr-to-improve-portability.patch

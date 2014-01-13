@@ -1,3 +1,9 @@
+tcpflow (1.4.4+repack1-2) unstable; urgency=low
+
+  * Bug fix: "FTBFS: test failures on armel, sparc" (Closes: #731673)
+
+ -- Dima Kogan <dima@secretsauce.net>  Mon, 13 Jan 2014 00:01:47 -0800
+
 tcpflow (1.4.4+repack1-1) unstable; urgency=low
 
   * Upstream update to 1.4.4

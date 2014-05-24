@@ -1,1 +1,1 @@
-usr/bin/*
+debian/build.inst/usr/bin/* usr/bin

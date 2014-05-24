@@ -1,7 +1,51 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with autoreconf
+	dh $@
 
 override_dh_strip:
 	dh_strip --dbg-package=tcpflow-dbg
+
+
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+BUILDDIR     := $(CURDIR)/debian/build
+BUILDDIR_NOX := $(CURDIR)/debian/build-nox
+
+conf_opts :=						\
+	--build=$(DEB_BUILD_GNU_TYPE)			\
+	--prefix=/usr					\
+	--includedir=/usr/include			\
+	--mandir=/usr/share/man				\
+	--infodir=/usr/share/info			\
+	--sysconfdir=/etc				\
+	--localstatedir=/var				\
+	--libdir=/usr/lib/$(DEB_HOST_GNU_TYPE)		\
+	--libexecdir=/usr/lib/$(DEB_HOST_GNU_TYPE)	\
+	--disable-maintainer-mode			\
+	--disable-dependency-tracking
+
+
+override_dh_auto_configure:
+	autoreconf -f -i
+	mkdir -p $(BUILDDIR)
+	cd $(BUILDDIR); ../../configure $(conf_opts)
+	mkdir -p $(BUILDDIR_NOX)
+	cd $(BUILDDIR_NOX);  ./../../configure $(conf_opts) --enable-cairo=false
+
+override_dh_auto_build:
+	dh_auto_build -a -- -C $(BUILDDIR_NOX)/src
+	dh_auto_build -a -- -C $(BUILDDIR)
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf $(BUILDDIR) $(BUILDDIR_NOX) \
+		config.log \
+		config.hin \
+		configure \
+		src/Makefile.in
+
+override_dh_auto_install:
+	$(MAKE) -C $(BUILDDIR) install DESTDIR=$(BUILDDIR).inst
+	$(MAKE) -C $(BUILDDIR_NOX) install DESTDIR=$(BUILDDIR_NOX).inst

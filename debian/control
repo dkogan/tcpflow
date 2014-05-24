@@ -6,7 +6,7 @@ Standards-Version: 3.9.4
 Build-Depends: debhelper (>= 9),
                libpcap0.8-dev,
                zlib1g,
-               dh-autoreconf,
+               autoconf, automake,
 # openssl dependency is for the test suite
                openssl,
                libssl-dev,
@@ -21,6 +21,7 @@ Package: tcpflow
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: tcpflow-nox
 Suggests: tcpdump
 Description: TCP flow recorder
  tcpflow is a program that captures data transmitted as part of TCP
@@ -40,6 +41,35 @@ Description: TCP flow recorder
  supports the same rich filtering expressions that programs like
  'tcpdump' support. tcpflow can also rebuild flows from data captured
  with 'tcpdump -w'.
+
+Package: tcpflow-nox
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: tcpflow
+Provides: tcpflow
+Suggests: tcpdump
+Description: TCP flow recorder - version without X11 dependencies 
+ tcpflow is a program that captures data transmitted as part of TCP
+ connections (flows), and stores the data in a way that is convenient
+ for protocol analysis or debugging. A program like 'tcpdump' shows a
+ summary of packets seen on the wire, but usually doesn't store the
+ data that's actually being transmitted. In contrast, tcpflow
+ reconstructs the actual data streams and stores each flow in a
+ separate file for later analysis.
+ .
+ tcpflow understands sequence numbers and will correctly reconstruct
+ data streams regardless of retransmissions or out-of-order delivery.
+ However, it currently does not understand IP fragments; flows
+ containing IP fragments will not be recorded properly.
+ .
+ tcpflow is based on the LBL Packet Capture Library and therefore
+ supports the same rich filtering expressions that programs like
+ 'tcpdump' support. tcpflow can also rebuild flows from data captured
+ with 'tcpdump -w'.
+ .
+ This package has no dependency on libcairo or any x11 libraries, and cannot
+ generate graphical reports.
 
 Package: tcpflow-dbg
 Section: debug

@@ -1,3 +1,15 @@
+tcpflow (1.4.4+repack1-3) unstable; urgency=medium
+
+  * Bug fix: "tcpflow with no -i doesn't work", thanks to
+    jidanni@jidanni.org; (Closes: #734064).
+  * Bug fix: "tcpflow prints "write error to stdout" after every
+    packet", thanks to Frank Gevaerts (Closes: #736417).
+  * I now build a 'tcpflow-nox' package to provide a tcpflow without
+    dependencies on x11 (Closes: #729360).
+  * Bumped Standards-Version to 3.9.5; no changes necessary
+
+ -- Dima Kogan <dima@secretsauce.net>  Sat, 31 May 2014 12:49:51 -0700
+
 tcpflow (1.4.4+repack1-2) unstable; urgency=low
 
   * Bug fix: "FTBFS: test failures on armel, sparc" (Closes: #731673)

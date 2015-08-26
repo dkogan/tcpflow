@@ -10,9 +10,9 @@ this does not happen
 
 Index: tcpflow/src/be13_api/bulk_extractor_i.h
 ===================================================================
---- tcpflow.orig/src/be13_api/bulk_extractor_i.h	2014-01-12 23:57:16.202181700 -0800
-+++ tcpflow/src/be13_api/bulk_extractor_i.h	2014-01-12 23:57:45.030324635 -0800
-@@ -279,7 +279,7 @@
+--- tcpflow.orig/src/be13_api/bulk_extractor_i.h
++++ tcpflow/src/be13_api/bulk_extractor_i.h
+@@ -278,7 +278,7 @@ namespace be13 {
      uint16_t th_win;            /* window */
      uint16_t th_sum;            /* checksum */
      uint16_t th_urp;            /* urgent pointer */

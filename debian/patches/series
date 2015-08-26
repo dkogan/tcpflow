@@ -1,7 +1,2 @@
 0001-using-the-debian-package-of-libhttp-parser-instead-o.patch
-0002-added-configure-option-to-disable-libcairo.patch
-0003-fixed-handling-of-fputc.patch
-0004-fixed-handling-of-fputc.patch
-0005-fixed-per-https-bugs.debian.org-cgi-bin-bugreport.cg.patch
-0006-fixed-so-that-it-properly-gets-default-device-if-no-.patch
 packing-struct-tcphdr-to-improve-portability.patch

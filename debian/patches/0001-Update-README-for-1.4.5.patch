@@ -1,0 +1,25 @@
+From 83ff311c1d9400f84999170506df8e454c2a49bb Mon Sep 17 00:00:00 2001
+From: Mike Dillon <mike@appropriate.io>
+Date: Mon, 24 Aug 2015 09:50:41 -0700
+Subject: [PATCH] Update README for 1.4.5
+Forwarded: https://github.com/simsong/tcpflow/pull/105
+
+---
+ README.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/README.md b/README.md
+index 037935d..c64dafa 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,5 @@
+-TCPFLOW 1.3
+-===========
++TCPFLOW 1.4.5
++=============
+ Downloads directory: http://www.digitalcorpora.org/downloads/tcpflow/
+ 
+ 
+-- 
+2.1.4
+

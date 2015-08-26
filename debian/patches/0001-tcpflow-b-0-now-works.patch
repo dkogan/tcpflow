@@ -2,6 +2,7 @@ From 7c32381b6548e407fc3d0f3a63ccf1b6b12dadfd Mon Sep 17 00:00:00 2001
 From: Dima Kogan <dima@secretsauce.net>
 Date: Thu, 5 Mar 2015 15:01:07 -0800
 Subject: [PATCH] 'tcpflow -b 0' now works
+Forwarded: https://github.com/simsong/tcpflow/issues/95
 
 This creates length-0 flow files that act as binary success/failure indicators
 ---

@@ -1,20 +1,4 @@
-case x"$srcdir" in 
-  x)
-    echo No srcdir specified. Assuming $0 is run locally
-    DMPDIR=.
-    TCPFLOW=../src/tcpflow
-    ;;
-  x.)
-    echo srcdir is .  Assuming $0 is run locally from make check
-    DMPDIR=.
-    TCPFLOW=../src/tcpflow
-    ;;
-  *)
-    echo srcdir is $srcdir Assuming $0 is run from make distcheck
-    DMPDIR=../../tests/
-    TCPFLOW=../../_build/src/tcpflow
-    ;;
-esac
+. $srcdir/test-subs.sh
 
 echo DMPDIR=$DMPDIR
 echo TCPFLOW=$TCPFLOW

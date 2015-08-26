@@ -32,7 +32,9 @@ static void netviz_process_packet(void *user,const be13::packet_info &pi)
 
 #endif
 
+#ifdef HAVE_LIBCAIRO
 static int histogram_dump = 0;
+#endif
 
 extern "C"
 void  scan_netviz(const class scanner_params &sp,const recursion_control_block &rcb)
@@ -46,7 +48,7 @@ void  scan_netviz(const class scanner_params &sp,const recursion_control_block &
 
     if(sp.phase==scanner_params::PHASE_STARTUP){
 	sp.info->name  = "netviz";
-	sp.info->flags = scanner_info::SCANNER_DISABLED;
+	sp.info->flags = scanner_info::SCANNER_DISABLED; // disabled by default
 	sp.info->author= "Mike Shick";
 	sp.info->packet_user = 0;
 #ifdef HAVE_LIBCAIRO

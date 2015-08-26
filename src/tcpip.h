@@ -1,6 +1,8 @@
 #ifndef TCPIP_H
 #define TCPIP_H
 
+#include <fstream>
+
 /** On windows, there is no in_addr_t; this is from
  * /usr/include/netinet/in.h
  */
@@ -51,12 +53,10 @@ public:;
     inline bool operator >=(const ipaddr &b) const { return memcmp(this->addr,b.addr,sizeof(addr))>=0; };
     inline bool operator < (const ipaddr &b) const { return memcmp(this->addr,b.addr,sizeof(this->addr))<0; }
 
-#pragma GCC diagnostic ignored "-Wcast-align"
-    inline bool isv4() const {		// is this an IPv6 address?
-	uint32_t *i = (uint32_t *)((uint8_t *)&addr);
-	return i[1]==0 && i[2]==0 && i[3]==0;
+    // We represent IPv4 addresses as 4 octets of address followed by 12 octets of 0.
+    inline bool isv4() const {		
+        return quad(4)==0 && quad(8)==0 && quad(12)==0;
     }
-#pragma GCC diagnostic warning "-Wcast-align"
 };
 
 inline std::ostream & operator <<(std::ostream &os,const ipaddr &b)  {
@@ -93,7 +93,6 @@ public:
     uint16_t    dport;		// Destination port number 
     sa_family_t family;		// AF_INET or AF_INET6 */
 
-#pragma GCC diagnostic ignored "-Wcast-align"
     uint64_t hash() const {
 	if(family==AF_INET){
 	    return ((uint64_t)(src.quad(0))<<32 | dst.quad(0))
@@ -101,12 +100,11 @@ public:
                 ^ (sport<<16 | dport);
 	} else {
 	    return (src.dquad(0)<<32 ^ dst.dquad(0))
-                ^ (dst.dquad(0)<<32 ^ src.dquad(0))
-                ^ (src.dquad(1) ^ dst.dquad(1))
+                ^ (dst.dquad(0)<<32  ^ src.dquad(0))
+                ^ (src.dquad(1)      ^ dst.dquad(1))
                 ^ (sport<<16 | dport);
 	}
     }
-#pragma GCC diagnostic warning "-Wcast-align"
 
     inline bool operator ==(const flow_addr &b) const {
 	return this->src==b.src &&
@@ -294,6 +292,10 @@ public:;
     int		fd;			// file descriptor for file storing this flow's data 
     bool	file_created;		// true if file was created
 
+    /* Flow Index information - only used if flow packet/data indexing is requested --GDD */
+    std::string flow_index_pathname;	// Path for the flow index file
+    std::fstream		idx_file;				// File descriptor for storing the flow index data
+
     /* Stats */
     recon_set   *seen;                  // what we've seen; it must be * due to boost lossage
     uint64_t    last_byte;              // last byte in flow processed
@@ -305,11 +307,14 @@ public:;
     void close_file();			// close fd
     int  open_file();                   // opens save file; return -1 if failure, 0 if success
     void print_packet(const u_char *data, uint32_t length);
-    void store_packet(const u_char *data, uint32_t length, int32_t delta);
+    void store_packet(const u_char *data, uint32_t length, int32_t delta,struct timeval ts);
     void process_packet(const struct timeval &ts,const int32_t delta,const u_char *data,const uint32_t length);
     uint32_t seen_bytes();
     void dump_seen();
     void dump_xml(class dfxml_writer *xmlreport,const std::string &xmladd);
+    static bool compare(std::string a, std::string b);
+    void sort_index(std::fstream *idx_file);
+    void sort_index();
 };
 
 /* print a tcpip data structure. Largely for debugging */

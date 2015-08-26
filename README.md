@@ -7,9 +7,13 @@ Compiling
 ---------
 To compile for Linux
 
-Be sure you have the necessary precursors:
+Be sure you have the necessary precursors. For RedHat based distributions use following command to install them:
 
     # yum -y install git gcc-c++ automake autoconf boost-devel cairo-devel libpcap-devel zlib-devel
+    
+If you are working on a Debian based distribution use this:
+
+    # sudo apt-get install git gcc g++ automake autoconf libpcap-dev libboost-dev libssl-dev zlib1g-dev libcairo2-dev
 
 Download the release from http://digitalcorpora.org/downloads/tcpflow/.  Compile and install with:
 
@@ -21,7 +25,7 @@ If you want do download the development tree with git, be sure to do a *complete
 
     git clone --recursive https://github.com/simsong/tcpflow.git
     cd tcpflow
-    sh bootstrap.sh
+    bash bootstrap.sh
     ./configure
     make
     sudo make install  
@@ -30,7 +34,7 @@ If you want do download the development tree with git, be sure to do a *complete
 To download and compile for Amazon AMI:
 
     ssh ec2-user@<your ec2 instance>
-    sudo bash yum -y install git make gcc-c++ automake autoconf boost-devel cairo-devel libpcap-devel zlib-devel
+    sudo bash yum -y install git make gcc-c++ automake autoconf boost-devel cairo-devel libpcap-devel openssl-devel zlib-devel
     git clone --recursive https://github.com/simsong/tcpflow.git
     sh bootstrap.sh
 
@@ -95,7 +99,7 @@ HERE are some examples:
 You can change the template that is used to create filenames with the
 -F and -T options.  If a directory appears in the template the directory will be automatically created.
 
-If you use the -a option, tcpflow will automatically interpert HTTP responses.
+If you use the -a option, tcpflow will automatically interpret HTTP responses.
 
        If the output file is
           208.111.153.175.00080-192.168.001.064.37314,

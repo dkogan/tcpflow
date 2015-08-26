@@ -7,7 +7,7 @@
 # and http://www.openismus.com/documents/linux/automake/automake.shtml 
 
 AC_PREREQ(2.57)
-AC_INIT(TCPFLOW, 1.4.4, bugs@afflib.org)
+AC_INIT(TCPFLOW, 1.4.5, simsong@github.com)
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
@@ -27,6 +27,10 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O                  dnl allow per-product flags
 AC_PROG_INSTALL
+
+m4_include([m4/slg_searchdirs.m4])
+m4_include([m4/slg_gcc_all_warnings.m4])
+
 
 # use C++11 mode if available; HAVE_CXX11 is defined in config.h if so.  Don't
 # use the GNU C++11 extensions for portability's sake (noext).
@@ -104,7 +108,6 @@ fi
 # causes configure to crash on gcc-4.2.1: -Wsign-compare-Winline 
 # causes warnings with unistd.h:  -Wnested-externs 
 # Just causes too much annoyance: -Wmissing-format-attribute 
-
 # Check GCC
 WARNINGS_TO_TEST="-MD -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wmissing-declarations -Wmissing-prototypes \
     -Wshadow -Wwrite-strings -Wcast-align -Waggregate-return \
@@ -183,18 +186,8 @@ unset option
 AC_LANG_POP()    
 
 ################################################################
-## Includes
-
-m4_include([src/dfxml/src/dfxml_configure.m4])
-m4_include([src/be13_api/be13_configure.m4])
-
-################################################################
 ##
 
-
-# sqlite3 is fun
-AC_CHECK_HEADERS([sqlite3.h])
-AC_CHECK_LIB([sqlite3],[sqlite3_open])
 
 #
 # ZLIB is required for decompressing
@@ -218,11 +211,18 @@ AC_CHECK_FUNCS([regcomp tre_regcomp tre_version])
 ################################################################
 ## OpenSSL Support (required for AFFLIB and hash_t )
 AC_CHECK_HEADERS([openssl/aes.h openssl/bio.h openssl/evp.h openssl/hmac.h openssl/md5.h openssl/pem.h openssl/rand.h openssl/rsa.h openssl/sha.h openssl/pem.h openssl/x509.h])
+AC_CHECK_LIB([dl],[dlopen])                   dnl apparently OpenSSL now needs -ldl on some Linux
 AC_CHECK_LIB([crypto],[EVP_get_digestbyname])	# if crypto is available, get it
 AC_CHECK_LIB([md],[MD5])                        # if libmd is available, get it 
 AC_CHECK_LIB([ssl],[SSL_library_init],,
      AC_MSG_ERROR([OpenSSL developer library 'libssl-dev' or 'openssl-devel' not installed]))
 AC_CHECK_FUNCS([MD5_Init EVP_get_digestbyname])
+
+################################################################
+## Includes
+
+m4_include([src/dfxml/src/dfxml_configure.m4])
+m4_include([src/be13_api/be13_configure.m4])
 
 ################################################################
 # PTHREAD support
@@ -235,6 +235,7 @@ if test  x"$mingw" = x"yes";  then
   CXXFLAGS="$CXXFLAGS -mthreads "
   AC_DEFINE(HAVE_PTHREAD,1,[Defined to POSIX threads for mingw])
   #AC_MSG_NOTICE([pthreads now disabled under mingw])
+  AC_CHECK_LIB([pthread],[pthread_create])
 else
   m4_include([m4/ax_pthread.m4])
   AX_PTHREAD([
@@ -285,41 +286,42 @@ AC_LANG_POP()
 ################################################################
 # drawing support via cairo
 #
+cairo=test
+AC_ARG_ENABLE([cairo],[  --enable-cairo=false to disable libcairo even if present])
+  if test "${enable_cairo}" = false ; then
+    cairo=false
+  fi
 
-# Cairo requires these to be explicitly included on mingw (and perhaps others):
-AC_CHECK_LIB([expat],[XML_ParserCreate])
-AC_CHECK_LIB([pixman-1],[pixman_region_init])
-AC_CHECK_LIB([bz2],[BZ2_bzDecompress])
-AC_CHECK_LIB([freetype],[FT_Init_FreeType]) # requires bz2
-AC_CHECK_LIB([fontconfig],[FcBlanksCreate]) # requires freetype expat
+if test $cairo = test ; then
+  # Cairo requires these to be explicitly included on mingw (and perhaps others):
+  AC_CHECK_LIB([expat],[XML_ParserCreate])
+  AC_CHECK_LIB([pixman-1],[pixman_region_init])
+  AC_CHECK_LIB([bz2],[BZ2_bzDecompress])
+  AC_CHECK_LIB([freetype],[FT_Init_FreeType]) # requires bz2
+  AC_CHECK_LIB([fontconfig],[FcBlanksCreate]) # requires freetype expat
 
-AC_CHECK_HEADERS([cairo/cairo.h cairo/cairo-pdf.h])
-AC_CHECK_HEADERS([cairo.h cairo-pdf.h])
-AC_CHECK_LIB([cairo],[cairo_create], , [
-  AC_MSG_WARN([
-*** cairo libraries not detected.
-*** Please install cairo-devel to get 1-page PDF summary generation.
-])
-  Fmissing_library="cairo-devel $missing_library "
-  Umissing_library="libcairo2-dev $missing_library "
-  Mmissing_library="cairo-devel "
-])
+  AC_CHECK_HEADERS([cairo/cairo.h cairo/cairo-pdf.h])
+  AC_CHECK_HEADERS([cairo.h cairo-pdf.h])
+  AC_CHECK_LIB([cairo],[cairo_create], , [
+    AC_MSG_WARN([
+  *** cairo libraries not detected.
+  *** Please install cairo-devel to get 1-page PDF summary generation.
+  ])
+    Fmissing_library="cairo-devel $missing_library "
+    Umissing_library="libcairo2-dev $missing_library "
+    Mmissing_library="cairo-devel "
+  ])
+fi
 
 ################################################################
 # pcap support. A bit more involved than normal due to the error message
 #
-pcap=test
-AC_ARG_ENABLE([pcap],[  --enable-pcap=false to disable libpcap even if present])
-  if test "${enableval}" = false ; then
-    pcap=false
-  fi
-
-if test $pcap = test ; then
-  AC_CHECK_HEADERS(pcap.h pcap/pcap.h )
-  if test x"$mingw" = x"yes" ; then 
+AC_CHECK_HEADERS(pcap.h pcap/pcap.h )
+if test x"$mingw" = x"yes" ; then 
     AC_MSG_WARN([pcap not supported under mingw])
-  else
+else
     AC_CHECK_LIB(pcap, pcap_lookupdev, , [
+        enable_pcap=no
 	AC_MSG_WARN([
 Can't find the pcap library (libpcap.a). 
 tcpflow will not live capture or compile rules without pcap!
@@ -340,8 +342,19 @@ located.])
         Umissing_library="$Umissing_library libpcap-dev "
         Mmissing_library="$Mmissing_library libpcap "
     ])
-  fi
 fi
+
+dnl set with_wifi to 0 if you do not want it
+AC_ARG_ENABLE([wifi],
+              AS_HELP_STRING([--disable-wifi], [Disable WIFI decoding]),
+              [],
+	      [
+               if test x"no" = x"$mingw"; then
+                 AC_DEFINE(USE_WIFI, 1, [Use WIFI decompression]) 
+                 wifi="yes"
+               fi
+              ])
+AM_CONDITIONAL([WIFI_ENABLED], [test "yes" = "$wifi"])
 
 
 ################################################################

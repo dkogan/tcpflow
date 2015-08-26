@@ -52,3 +52,4 @@ cmd()
     echo $1
     if ! $1 ; then echo failed; exit 1; fi
 }
+

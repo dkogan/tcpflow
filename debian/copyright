@@ -3,12 +3,7 @@ Source: https://github.com/simsong/tcpflow
 Upstream-Contact: Simson Garfinkel <simsong@acm.org>
 Upstream-Name: tcpflow
 
-Files: *
-Copyright: 1999-2003 Jeremy Elson <jelson@circlemud.org>
-           2012-2013 Simson Garfinkel <simsong@acm.org>
-License: GPL-3
-
-Files: src/cpack.*
+Files: src/wifipcap/cpack.*
 Copyright: 2003-2004 David Young
 License: BSD-3clause-Young
 
@@ -44,7 +39,7 @@ Copyright:  2007 Andy Green <andy@warmcat.com>
             2009 Johannes Berg <johannes@sipsolutions.net>
 License: GPL-2
 
-Files: src/wifipcap.cpp
+Files: src/wifipcap/wifipcap.cpp
 Copyright: 1998 Gerald Combs <gerald@ethereal.com>
            2006-2007 Doug Madory
            2008 Jeff Pang <jeffpang@cs.cmu.edu>
@@ -55,7 +50,7 @@ Comment: This has a piece by Gerald Combs, which is licensed GPL-2+. The bulk of
  (GPL-3). Combination is GPL-3
 
 
-Files: src/wifipcap.h
+Files: src/wifipcap/wifipcap.h
 Copyright: 2006-2007 Doug Madory
            2008 Jeff Pang <jeffpang@cs.cmu.edu>
            2013 Simson Garfinkel <simsong@acm.org>
@@ -71,21 +66,15 @@ Comment: License Confirmed in an email to the author. Patch documenting this
  added right after the 1.4.0 release of tcpflow
 
 
-Files: src/uni/ethertype.h
+Files: src/wifipcap/ethertype.h
 Copyright: 1993, 1994, 1996 The Regents of the University of California
 License: BSD-3clause-uni
 
-Files: src/uni/extract.h
+Files: src/wifipcap/extract.h
 Copyright: 1992, 1993, 1994, 1995, 1996 The Regents of the University of California
 License: BSD-3clause-uni
 
-Files: src/uni/ieee802_11.h
-Copyright: 2001 Fortress Technologies
-           Charlie Lenahan <clenahan@fortresstech.com>
-           2013 Simson Garfinkel <simsong@acm.org>
-License: BSD-3clause-uni
-
-Files: src/uni/llc.h
+Files: src/wifipcap/llc.h
 Copyright: 1993, 1994, 1997 The Regents of the University of California
 License: BSD-3clause-uni
 
@@ -107,18 +96,13 @@ License: BSD-3clause-uni
  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 
-Files: src/uni/ieee802_11_radio.h
+Files: src/wifipcap/ieee802_11_radio.h
 Copyright: 2003, 2004 David Young
 License: BSD-3clause-Young
 
-Files: src/uni/oui.h src/wifipcap/oui.h
-Copyright: 2006-2007 Doug Madory
-           2008 Jeff Pang <jeffpang@cs.cmu.edu>
-License: BSD-2clause-MadoryPang
-
-Files: src/uni/packet-ieee80211.h
-Copyright: 2000 Axis Communications AB
-License: GPL-2+
+Files: src/wifipcap/oui.h
+Copyright: 2006 Hannes Gredler <hannes@juniper.net>
+License: BSD-2clause
 
 Files: src/netviz/*
 Copyright: 2012-2013 Michael Shick <mfshick@nps.edu>
@@ -238,6 +222,18 @@ License: BSD-2clause-MadoryPang
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+License: BSD-2clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that: (1) source code
+ distributions retain the above copyright notice and this paragraph
+ in its entirety, and (2) distributions including binary code include
+ the above copyright notice and this paragraph in its entirety in
+ the documentation or other materials provided with the distribution.
+ THIS SOFTWARE IS PROVIDED ``AS IS'' AND
+ WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT
+ LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE.
+
 
 Files: src/be13_api/utf8/* src/be13_api/utf8.h
 Copyright: 2006 Nemanja Trifunovic
@@ -273,39 +269,15 @@ Copyright: 2013 Simson Garfinkel <simsong@acm.org>
 License: public-domain
  Confirmed by email to the author
 
-Files: src/http-parser/*
-Copyright: Igor Sysoev
-           Joyent, Inc. and other Node contributors
-License: Expat
- http_parser.c is based on src/http/ngx_http_parse.c from NGINX copyright
- Igor Sysoev.
- .
- Additional changes are licensed under the same terms as NGINX and
- copyright Joyent, Inc. and other Node contributors. All rights reserved.
- .
- Permission is hereby granted, free of charge, to any person obtaining a
- copy of this software and associated documentation files (the "Software"),
- to deal in the Software without restriction, including without limitation
- the rights to use, copy, modify, merge, publish, distribute, sublicense,
- and/or sell copies of the Software, and to permit persons to whom the
- Software is furnished to do so, subject to the following conditions:
- .
- The above copyright notice and this permission notice shall be included
- in all copies or substantial portions of the Software.
- .
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
 Files: debian/*
 Copyright: 2012-2013 Dima Kogan <dima@secretsauce.net>
            2000 Robert McQueen <robot101@debian.org>
            2006-2010 Romain Francoise <rfrancoise@debian.org>
+License: GPL-3
+
+Files: *
+Copyright: 1999-2003 Jeremy Elson <jelson@circlemud.org>
+           2012-2013 Simson Garfinkel <simsong@acm.org>
 License: GPL-3
 
 License: GPL-3

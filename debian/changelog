@@ -1,3 +1,10 @@
+tcpflow (1.4.5+repack1-1) unstable; urgency=medium
+
+  * New upstream release
+  * patch update: removed patches accepted upstream (Closes: #638804)
+
+ -- Dima Kogan <dima@secretsauce.net>  Tue, 25 Aug 2015 20:55:52 -0700
+
 tcpflow (1.4.4+repack1-3) unstable; urgency=medium
 
   * Bug fix: "tcpflow with no -i doesn't work", thanks to
